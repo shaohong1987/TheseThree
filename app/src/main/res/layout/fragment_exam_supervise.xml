@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="com.shaohong.thesethree.modules.exam.ExamSuperviseFragment">
+
+    <ImageView
+        android:id="@+id/barcode_enter_exam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:text="@string/sign_exam"
+        android:layout_gravity="center_horizontal"
+        android:textSize="@dimen/medium_font_size"/>
+
+    <TextView
+        android:layout_marginTop="@dimen/small_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/micro_margin"
+        android:background="@color/colorBlue"
+        android:gravity="center_horizontal"
+        android:fontFamily="sans-serif-thin"
+        android:textStyle="bold"
+        android:textColor="@color/colorWhite"
+        android:text="已签到,未交卷"/>
+
+    <TextView
+        android:layout_marginTop="@dimen/medium_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/micro_margin"
+        android:background="@color/colorBlue"
+        android:gravity="center_horizontal"
+        android:fontFamily="sans-serif-thin"
+        android:textColor="@color/colorWhite"
+        android:textStyle="bold"
+        android:text="已交卷"/>
+
+</LinearLayout>

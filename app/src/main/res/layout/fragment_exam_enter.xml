@@ -1,0 +1,103 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="com.shaohong.thesethree.modules.exam.ExamSuperviseFragment">
+
+    <TextView
+        android:id="@+id/timer_exam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="@dimen/medium_margin"
+        android:fontFamily="sans-serif"
+        android:textColor="@color/colorPink"
+        android:textSize="@dimen/large_font_size"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="(倒计时)"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin"
+        android:background="@color/colorBlue"
+        android:fontFamily="sans-serif-thin"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/micro_margin"
+        android:text="考试信息"
+        android:textColor="@color/colorWhite"
+        android:textSize="@dimen/large_font_size"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="名称：全院护士三基考试"
+        android:textSize="@dimen/medium_font_size"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="时间：2017-05-12 17:30"
+        android:textSize="@dimen/medium_font_size"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="时长：2 小时"
+        android:textSize="@dimen/medium_font_size"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="地点：12号楼3层大会议室"
+        android:textSize="@dimen/medium_font_size"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/medium_margin"
+        android:background="@color/colorBlue"
+        android:fontFamily="sans-serif-thin"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/micro_margin"
+        android:text="考生信息"
+        android:textColor="@color/colorWhite"
+        android:textSize="@dimen/large_font_size"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="姓名：张三李四王二麻"
+        android:textSize="@dimen/medium_font_size"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="工号：1029384756"
+        android:textSize="@dimen/medium_font_size"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="科室：360°美容整形科"
+        android:textSize="@dimen/medium_font_size"/>
+
+    <Button
+        android:id="@+id/enter_exam_button"
+        style="@style/button_circle_corner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/small_margin"
+        android:layout_marginTop="@dimen/large_margin"
+        android:text="扫码签到"
+        android:textColor="@color/colorBlue"
+        android:textSize="@dimen/medium_font_size"/>
+
+</LinearLayout>

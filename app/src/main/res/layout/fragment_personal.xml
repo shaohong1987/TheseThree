@@ -1,0 +1,131 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="com.shaohong.thesethree.modules.personal.PersonalFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="@dimen/medium_margin">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/profile_image"
+                    android:layout_width="144dp"
+                    android:layout_height="144dp"
+                    android:src="@drawable/ic_account_circle_black_24dp"
+                    app:civ_border_color="@color/colorBlue"
+                    app:civ_border_width="2dp"/>
+
+                <Button
+                    android:id="@+id/login_in_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/small_margin"
+                    android:background="@color/colorWhite"
+                    android:text="登录"
+                    android:textColor="@color/colorBlue"
+                    android:textSize="@dimen/large_font_size"/>
+
+                <TextView
+                    android:id="@+id/user_info_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/medium_margin"
+                    android:text="张三 901234 整形美容外科"
+                    android:textColor="@color/colorBlue"
+                    android:textSize="@dimen/medium_font_size"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/personal_info_menu_layout"
+                style="@style/wrap_layout">
+                <!-- 上圆角-->
+                <LinearLayout style="@style/top_layout"
+                              android:id="@+id/personal_info_layout">
+                    <TextView
+                        style="@style/user_text"
+                        android:text="个人资料"/>
+
+                    <ImageView style="@style/img_arrow"/>
+                </LinearLayout>
+                <!-- 分割线 -->
+                <View style="@style/bg_line"/>
+                <!-- 下圆角-->
+                <LinearLayout style="@style/bottom_layout"
+                              android:id="@+id/mistake_book_layout">
+
+                    <TextView
+                        style="@style/user_text"
+                        android:text="错题集"/>
+
+                    <ImageView style="@style/img_arrow"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout style="@style/wrap_layout">
+                <!-- 上圆角-->
+                <LinearLayout style="@style/top_layout"
+                              android:id="@+id/help_feedback_layout">
+
+                    <TextView
+                        style="@style/user_text"
+                        android:text="帮助反馈"/>
+
+                    <ImageView style="@style/img_arrow"/>
+                </LinearLayout>
+                <!-- 分割线 -->
+                <View style="@style/bg_line"/>
+
+                <LinearLayout style="@style/base_layout"
+                              android:id="@+id/clear_cache_layout">
+
+                    <TextView
+                        style="@style/user_text"
+                        android:text="清除缓存"/>
+
+                    <ImageView style="@style/img_arrow"/>
+                </LinearLayout>
+                <!-- 分割线 -->
+                <View style="@style/bg_line"/>
+                <!-- 下圆角-->
+                <LinearLayout style="@style/bottom_layout"
+                              android:id="@+id/about_us_layout">
+
+                    <TextView
+                        style="@style/user_text"
+                        android:text="关于"/>
+
+                    <ImageView style="@style/img_arrow"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/login_out_button"
+                style="@style/button_circle_corner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/small_margin"
+                android:textSize="@dimen/medium_font_size"
+                android:text="退出登录"
+                android:textColor="@color/colorBlue"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
