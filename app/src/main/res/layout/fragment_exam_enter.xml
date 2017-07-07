@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/small_margin"
         android:layout_marginTop="@dimen/large_margin"
-        android:text="扫码签到"
+        android:text="开始答题"
         android:textColor="@color/colorBlue"
         android:textSize="@dimen/medium_font_size"/>
 

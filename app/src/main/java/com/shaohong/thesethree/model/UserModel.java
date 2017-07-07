@@ -39,11 +39,11 @@ public class UserModel {
     * 登陆操作
     * */
     public boolean login(String userName,String password) throws IOException, JSONException {
-       /* OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient();
         RequestBody formBody = new FormBody.Builder()
-                .add("userId", userName)
+                .add("phone", userName)
                 .add("password",password)
-                .add("dervicetoken","1234567890")
+                .add("dervicetoken","1")
                 .build();
         Request request = new Request.Builder()
                 .url(ConstantUtils.REQUEST_URL+"login")
@@ -59,7 +59,7 @@ public class UserModel {
                     Context context = ContextUtils.getInstance();
                     SharedPreferences sp = context.getApplicationContext().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sp.edit();
-                    editor.putString("userName", userName);
+                    editor.putString("phone", userName);
                     editor.putString("password", password);
                     editor.putString("name", obj.getString("name"));
                     editor.putInt("id", 1);
@@ -69,15 +69,15 @@ public class UserModel {
             }
         } else {
             throw new IOException("Unexpected code " + response);
-        }*/
-        Context context = ContextUtils.getInstance();
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putString("userName", userName);
-        editor.putString("password", password);
-        editor.putInt("id", 1);
-        editor.commit();
-        return true;
+        }
+//        Context context = ContextUtils.getInstance();
+//        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sp.edit();
+//        editor.putString("userName", userName);
+//        editor.putString("password", password);
+//        editor.putInt("id", 1);
+//        editor.commit();
+          return false;
     }
 
     /*

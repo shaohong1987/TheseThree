@@ -51,7 +51,7 @@ public class ExamEnterFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String arg = ((Button) v).getText().toString();
-                if (arg == "开始答题") {
+                if (arg.equals("开始答题")) {
                     Intent intent=new Intent(getActivity(),ExamActivity.class);
                     intent.putExtra(ConstantUtils.EXAM_INFO,exam);
                     startActivity(intent);

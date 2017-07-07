@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="96dp"
+              android:layout_marginTop="@dimen/small_margin"
+              android:orientation="horizontal"
+              android:background="@color/colorWhite">
+
+    <LinearLayout style="@style/record_exam_layout">
+        <TextView
+            style="@style/record_exam_title_text_view"
+            android:text="@string/title_1_exam" />
+        <TextView
+            style="@style/record_exam_content_text_view"
+            android:id="@+id/xue_fen_exam"
+            android:text="0"/>
+    </LinearLayout>
+
+    <View style="@style/record_exam_view"/>
+
+    <LinearLayout style="@style/record_exam_layout">
+        <TextView
+            style="@style/record_exam_title_text_view"
+            android:text="@string/title_2_exam" />
+        <TextView
+            style="@style/record_exam_content_text_view"
+            android:id="@+id/correct_rate_exam"
+            android:text="100%"/>
+    </LinearLayout>
+
+    <View style="@style/record_exam_view"/>
+
+    <LinearLayout style="@style/record_exam_layout">
+        <TextView
+            style="@style/record_exam_title_text_view"
+            android:text="@string/title_3_exam" />
+        <TextView
+            style="@style/record_exam_content_text_view"
+            android:id="@+id/do_times_exam"
+            android:text="0"/>
+    </LinearLayout>
+</LinearLayout>

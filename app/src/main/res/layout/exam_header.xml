@@ -1,42 +1,74 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="96dp"
-              android:layout_marginTop="@dimen/small_margin"
-              android:orientation="horizontal"
-              android:background="@color/colorWhite">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/the_head"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorBlue"
+                android:orientation="horizontal" >
 
-    <LinearLayout style="@style/record_exam_layout">
-        <TextView
-            style="@style/record_exam_title_text_view"
-            android:text="@string/title_1_exam" />
-        <TextView
-            style="@style/record_exam_content_text_view"
-            android:id="@+id/xue_fen_exam"
-            android:text="0"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="10dip" >
+
+        <ImageView
+            android:id="@+id/left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dip"
+            android:layout_marginTop="8dip"
+            android:background="@drawable/back"
+            android:contentDescription="@string/app_name"
+            android:gravity="center"
+            android:paddingLeft="10dip" />
     </LinearLayout>
 
-    <View style="@style/record_exam_view"/>
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="150dip"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp" />
 
-    <LinearLayout style="@style/record_exam_layout">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingRight="10dip" >
+
         <TextView
-            style="@style/record_exam_title_text_view"
-            android:text="@string/title_2_exam" />
+            android:id="@+id/gps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="8dp"
+            android:drawablePadding="3dp"
+            android:textColor="@color/colorWhite"
+            android:textSize="17sp"
+            android:visibility="gone" />
+
         <TextView
-            style="@style/record_exam_content_text_view"
-            android:id="@+id/correct_rate_exam"
-            android:text="100%"/>
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dip"
+            android:layout_marginTop="8dip"
+            android:contentDescription="@string/app_name"
+            android:drawablePadding="3dip"
+            android:gravity="center"
+            android:textColor="@color/colorWhite"
+            android:textSize="17sp" />
     </LinearLayout>
 
-    <View style="@style/record_exam_view"/>
-
-    <LinearLayout style="@style/record_exam_layout">
-        <TextView
-            style="@style/record_exam_title_text_view"
-            android:text="@string/title_3_exam" />
-        <TextView
-            style="@style/record_exam_content_text_view"
-            android:id="@+id/do_times_exam"
-            android:text="0"/>
-    </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

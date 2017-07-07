@@ -14,4 +14,20 @@
     <color name="result_point_color">#C0FFFF00</color>
     <color name="laser_color">#0F0</color>
     <color name="corner_color">#00FF00</color>
+
+    <color name="menu_bottom_text">#f2f8ff</color>
+    <color name="view_manager">#e3e3e3</color>
+    <!-- 答题 -->
+    <color name="practice_test_no_text">#2b89e9</color>
+    <color name="practice_test_content_text">#2f2f2f</color>
+    <color name="practice_test_result_text">#9a9a9a</color>
+    <color name="practice_test_result_right_text">#61bc31</color>
+    <color name="practice_test_result_wrong_text">#d53235</color>
+    <color name="practice_test_result_statistics_text">#2991f4</color>
+    <color name="practice_test_result_detail_text">#ab8b28</color>
+    <color name="my_error_question_text_black">#333333</color>
+    <color name="lucky_text_redtop">#e33b20</color>
+    <color name="lucky_text_black">#676566</color>
+    <color name="lucky_text_red">#e43b1c</color>
+    <color name="black38_text">#383838</color>
 </resources>
