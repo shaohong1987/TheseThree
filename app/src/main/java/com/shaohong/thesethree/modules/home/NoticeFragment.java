@@ -38,6 +38,22 @@ public class NoticeFragment extends Fragment implements AdapterView.OnItemClickL
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        swipeRefreshLayout.setRefreshing(true);
+        DbManager dbManager=new DbManager(getContext());
+        dbManager.openDB();
+        mMessageItems.clear();
+        List<HistoryListItemObject> data=dbManager.queryNotices();
+        if(data!=null&&data.size()>0){
+            mMessageItems.addAll(data);
+        }
+        rowId=dbManager.getMaxNoticeId();
+        dbManager.closeDB();
+        new LoadDataThread().start();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view= inflater.inflate(R.layout.fragment_home_notice, container, false);

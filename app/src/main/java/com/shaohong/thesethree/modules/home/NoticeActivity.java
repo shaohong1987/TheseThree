@@ -27,9 +27,9 @@ public class NoticeActivity extends AppCompatActivity {
 
     private ViewGroup button_layout;
     private TextView status_text_view;
-    private int type;
-    private int actionType;
-
+    private int testCode;
+    private int type;//0:考试通知，else：培训通知
+    private int noticeId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,23 +46,30 @@ public class NoticeActivity extends AppCompatActivity {
         if(object!=null){
             String status=object.getStatus();
             status_text_view.setText(status);
+            noticeId=object.getId();
             if(status.equals("未确认")){
                 if(object.getType().equals("考试通知")){
-
+                    testCode= Integer.parseInt(object.getTestcode());
+                    type=0;
+                }else{
+                    testCode= Integer.parseInt(object.getEducode());
+                    type=1;
                 }
                 button_layout.setVisibility(View.VISIBLE);
-                Button confirm_button=(Button) findViewById(R.id.confirm_notice_detail);
+                final Button confirm_button=(Button) findViewById(R.id.confirm_notice_detail);
                 Button refuse_button= (Button) findViewById(R.id.refuse_notice_detail);
                 confirm_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        updateStatus("已确认");
+                        new ConfirmThread().start();
                     }
                 });
                 refuse_button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        updateStatus("已拒绝");
+                        new RefuseThread().start();
                     }
                 });
             }else{
@@ -71,6 +78,12 @@ public class NoticeActivity extends AppCompatActivity {
         }
     }
 
+    private void updateStatus(String status){
+        DbManager db=new DbManager(getApplicationContext());
+        db.openDB();
+        db.updateNoticeStatus(noticeId,status);
+        db.closeDB();
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -86,16 +99,40 @@ public class NoticeActivity extends AppCompatActivity {
             super.handleMessage(msg);
             switch (msg.what){
                 case 1:
-
+                        finish();
                     break;
             }
         }
     };
-    class LoadDataThread extends Thread{
+    class ConfirmThread extends Thread{
         @Override
         public void run() {
             try {
-                HomeModel.DengJi(getApplicationContext(),1);
+                if(type==0){
+                    HomeModel.DengJi(getApplicationContext(),testCode);
+                }else{
+                    HomeModel.DengJiEdu(getApplicationContext(),testCode);
+                }
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            handler.sendEmptyMessage(1);
+        }
+    }
+    class RefuseThread extends Thread{
+        @Override
+        public void run() {
+            try {
+                if(type==0) {
+                    HomeModel.JuJue(getApplicationContext(), testCode);
+                }else{
+                    HomeModel.JuJuePx(getApplicationContext(), testCode);
+                }
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -13,10 +13,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.Course;
 import com.shaohong.thesethree.bean.Edu;
+import com.shaohong.thesethree.bean.EduDetail;
 import com.shaohong.thesethree.bean.Exam;
 import com.shaohong.thesethree.bean.HistoryListItemObject;
 import com.shaohong.thesethree.database.DbManager;
@@ -46,8 +48,9 @@ public class CourseInfoFragment extends Fragment {
     RecyclerView recyclerView;
 
     public int courseType = 1;
-    private List<Edu> data = new ArrayList<>();
+    private List<EduDetail> data = new ArrayList<>();
     private CourseRecyclerViewAdapter adapter = new CourseRecyclerViewAdapter(data);
+    private EduDetail mEduDetail;
 
     @Nullable
     @Override
@@ -56,7 +59,7 @@ public class CourseInfoFragment extends Fragment {
         ButterKnife.bind(this, view);
         initView();
         swipeRefreshLayout.setRefreshing(true);
-        new LoadDataThread();
+        new LoadDataThread().start();
         return view;
     }
 
@@ -94,10 +97,8 @@ public class CourseInfoFragment extends Fragment {
         adapter.setOnItemClickListener(new CourseRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-//                Edu course = data.get(position);
-//                Intent intent = new Intent(getActivity(), CourseActivity.class);
-//                intent.putExtra(ConstantUtils.COURSE_INFO, course);
-//                startActivity(intent);
+                mEduDetail = data.get(position);
+                new GetCourseStateThread().start();
             }
 
             @Override
@@ -121,6 +122,14 @@ public class CourseInfoFragment extends Fragment {
                         swipeRefreshLayout.setRefreshing(false);//设置不刷新
                     }
                     break;
+                case 2:
+                    Intent intent = new Intent(getActivity(), CourseActivity.class);
+                    intent.putExtra(ConstantUtils.COURSE_INFO, mEduDetail);
+                    startActivity(intent);
+                    break;
+                case 3:
+                    Toast.makeText(getContext(),"操作失败",Toast.LENGTH_LONG).show();
+                    break;
             }
         }
     };
@@ -130,7 +139,7 @@ public class CourseInfoFragment extends Fragment {
             try {
                 if (ContextUtils.isLogin) {
                     data.clear();
-                    List<Edu> edus = CourseModel.getEdus(getContext(),courseType);
+                    List<EduDetail> edus = CourseModel.getEdus(getContext(),courseType);
                     if(edus!=null&&edus.size()>0){
                         data.addAll(edus);
                     }
@@ -144,6 +153,27 @@ public class CourseInfoFragment extends Fragment {
                 e.printStackTrace();
             }
             handler.sendEmptyMessage(1);
+        }
+    }
+
+    class GetCourseStateThread extends Thread{
+        @Override
+        public void run() {
+            int result=0;
+            try {
+                if(ContextUtils.isLogin){
+                    boolean flag=CourseModel.getEdu(mEduDetail.id);
+                    result=flag?2:3;
+                }
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            handler.sendEmptyMessage(result);//通过handler发送一个更新数据的标记
         }
     }
 }

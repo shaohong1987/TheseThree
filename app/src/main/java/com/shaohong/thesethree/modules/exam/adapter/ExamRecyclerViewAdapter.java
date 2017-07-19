@@ -48,7 +48,7 @@ public class ExamRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     @Override
     public int getItemCount() {
-        return data.size() == 0 ? 0 : data.size() + 1;
+        return data.size() == 0 ? 0 : data.size();
     }
 
     @Override

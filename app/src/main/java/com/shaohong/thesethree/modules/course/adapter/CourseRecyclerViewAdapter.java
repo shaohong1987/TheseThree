@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.Course;
 import com.shaohong.thesethree.bean.Edu;
+import com.shaohong.thesethree.bean.EduDetail;
 import com.shaohong.thesethree.utils.ContextUtils;
 
 import org.w3c.dom.Text;
@@ -47,7 +48,7 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView
 
     @Override
     public int getItemCount() {
-        return data.size() == 0 ? 0 : data.size() + 1;
+        return data.size() == 0 ? 0 : data.size();
     }
 
     @Override
@@ -66,14 +67,14 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemViewHolder) {
-            Edu course = (Edu) data.get(position);
-            ((ItemViewHolder) holder).nameTextView.setText(course.content);
-            ((ItemViewHolder) holder).dateTextView.setText(course.sendtime);
-//            ((ItemViewHolder) holder).addressTextView.setText(course.getAddress());
-//            ((ItemViewHolder) holder).statusTextView.setText(course.getStatus());
-//            ((ItemViewHolder) holder).centTextView.setText(course.getCent());
-//            ((ItemViewHolder) holder).publisherTextView.setText(course.getPublisher());
-//            ((ItemViewHolder) holder).publishDateTextView.setText(course.getPublishDate());
+            EduDetail course = (EduDetail) data.get(position);
+            ((ItemViewHolder) holder).nameTextView.setText(course.zhuti);
+            ((ItemViewHolder) holder).dateTextView.setText(course.time);
+            ((ItemViewHolder) holder).addressTextView.setText(course.adress);
+            ((ItemViewHolder) holder).statusTextView.setText(course.state>0?"已报名":"未报名");
+            ((ItemViewHolder) holder).centTextView.setText(String.valueOf(course.score));
+            ((ItemViewHolder) holder).publisherTextView.setText(course.org);
+            ((ItemViewHolder) holder).publishDateTextView.setText(course.recordtime);
             if (onItemClickListener != null) {
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override

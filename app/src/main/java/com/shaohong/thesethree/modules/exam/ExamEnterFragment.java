@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.acker.simplezxing.activity.CaptureActivity;
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.Exam;
 import com.shaohong.thesethree.model.ExamModel;
@@ -35,9 +36,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
+import static android.app.Activity.RESULT_OK;
+
 public class ExamEnterFragment extends Fragment {
-    //扫描成功返回码
-    private int RESULT_OK = 0xA1;
+
     TextView timer_text_view;
     Button sign_button;
     private Exam mExam;
@@ -73,19 +75,19 @@ public class ExamEnterFragment extends Fragment {
                     startActivity(intent);
                 }
                 if (arg.equals("扫码签到")) {
-//                    Intent intent = new Intent(getActivity(), CaptureActivity.class);
-//                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-//                    Bundle bundle = new Bundle();
-//                    bundle.putBoolean(CaptureActivity.KEY_NEED_BEEP, CaptureActivity.VALUE_BEEP);
-//                    bundle.putBoolean(CaptureActivity.KEY_NEED_VIBRATION, CaptureActivity.VALUE_VIBRATION);
-//                    bundle.putBoolean(CaptureActivity.KEY_NEED_EXPOSURE, CaptureActivity.VALUE_NO_EXPOSURE);
-//                    bundle.putByte(CaptureActivity.KEY_FLASHLIGHT_MODE, CaptureActivity.VALUE_FLASHLIGHT_OFF);
-//                    bundle.putByte(CaptureActivity.KEY_ORIENTATION_MODE, CaptureActivity.VALUE_ORIENTATION_AUTO);
-//                    bundle.putBoolean(CaptureActivity.KEY_SCAN_AREA_FULL_SCREEN, CaptureActivity.VALUE_SCAN_AREA_FULL_SCREEN);
-//                    bundle.putBoolean(CaptureActivity.KEY_NEED_SCAN_HINT_TEXT, CaptureActivity.VALUE_SCAN_HINT_TEXT);
-//                    intent.putExtra(CaptureActivity.EXTRA_SETTING_BUNDLE, bundle);
-//                    startActivityForResult(intent, CaptureActivity.REQ_CODE);
-                    new QdUdpUtils().start();
+                    Intent intent = new Intent(getActivity(), CaptureActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean(CaptureActivity.KEY_NEED_BEEP, CaptureActivity.VALUE_BEEP);
+                    bundle.putBoolean(CaptureActivity.KEY_NEED_VIBRATION, CaptureActivity.VALUE_VIBRATION);
+                    bundle.putBoolean(CaptureActivity.KEY_NEED_EXPOSURE, CaptureActivity.VALUE_NO_EXPOSURE);
+                    bundle.putByte(CaptureActivity.KEY_FLASHLIGHT_MODE, CaptureActivity.VALUE_FLASHLIGHT_OFF);
+                    bundle.putByte(CaptureActivity.KEY_ORIENTATION_MODE, CaptureActivity.VALUE_ORIENTATION_AUTO);
+                    bundle.putBoolean(CaptureActivity.KEY_SCAN_AREA_FULL_SCREEN, CaptureActivity.VALUE_SCAN_AREA_FULL_SCREEN);
+                    bundle.putBoolean(CaptureActivity.KEY_NEED_SCAN_HINT_TEXT, CaptureActivity.VALUE_SCAN_HINT_TEXT);
+                    intent.putExtra(CaptureActivity.EXTRA_SETTING_BUNDLE, bundle);
+                    startActivityForResult(intent, CaptureActivity.REQ_CODE);
+
                 }
                 if (arg.equals("下载试卷")) {
                     Toast.makeText(getContext(), "开始现在试卷，请耐心等待", Toast.LENGTH_LONG).show();
@@ -124,9 +126,10 @@ public class ExamEnterFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             Bundle bundle = data.getExtras();
-            String scanResult = (String) bundle.get("qr_scan_result");
+            String scanResult = (String) bundle.get("SCAN_RESULT");
             if (String.valueOf(mExam.getId()).equals(scanResult)) {
                 new LoadDataThread().start();
+                new QdUdpUtils().start();
             } else {
                 new AlertDialog.Builder(getContext())
                         .setTitle("提示")

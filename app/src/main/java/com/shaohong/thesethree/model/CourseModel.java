@@ -27,8 +27,7 @@ import okhttp3.Response;
  */
 
 public class CourseModel {
-    public static Edu getEdu(int eduId) throws IOException, JSONException {
-        Edu edu=new Edu();
+    public static boolean getEdu(int eduId) throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient();
         RequestBody formBody = new FormBody.Builder()
                 .add("eduId", String.valueOf(eduId))
@@ -44,20 +43,20 @@ public class CourseModel {
                 JSONObject obj=new JSONObject(result);
                 if(obj.getString("result").equals("true"))
                 {
-
+                    return true;
                 }
             }
         } else {
             throw new IOException("Unexpected code " + response);
         }
-        return edu;
+        return false;
     }
 
-    public static List<Edu> getEdus(Context context,int type) throws IOException, JSONException{
+    public static List<EduDetail> getEdus(Context context,int type) throws IOException, JSONException{
         SharedPreferencesHelper sharedPreferencesHelper=new SharedPreferencesHelper(context);
         int userid=(int)sharedPreferencesHelper.get("userid",-1);
-        int hosid=(int)sharedPreferencesHelper.get("hospitalcode",-1);
-        List<Edu> list = new ArrayList<>();
+        int hosid=Integer.parseInt(sharedPreferencesHelper.get("hospitalcode","-1").toString());
+        List<EduDetail> list = new ArrayList<>();
         OkHttpClient client = new OkHttpClient();
         RequestBody formBody = new FormBody.Builder()
                 .add("type", String.valueOf(type))
@@ -78,8 +77,18 @@ public class CourseModel {
                     JSONArray jsonArray=obj.getJSONArray("data");
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject lan = jsonArray.getJSONObject(i);
-                        Edu commonData = new Edu();
-
+                        EduDetail commonData = new EduDetail();
+                        commonData.adress=lan.getString("adress");
+                        commonData.hosid=lan.getInt("hosid");
+                        commonData.id=lan.getInt("id");
+                        commonData.org=lan.getString("org");
+                        commonData.recordtime=lan.getString("recordtime");
+                        commonData.score=lan.getInt("score");
+                        commonData.teacher=lan.getString("teacher");
+                        commonData.zhuti=lan.getString("zhuti");
+                        commonData.time=lan.getString("time");
+                        commonData.state=lan.getInt("state");
+                        commonData.type=lan.getInt("type");
                         list.add(commonData);
                     }
                 }
