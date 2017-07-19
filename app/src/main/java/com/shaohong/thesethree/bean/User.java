@@ -1,7 +1,7 @@
 package com.shaohong.thesethree.bean;
 
 /**
- * Created by shaohong on 2017/5/1.
+ * Created by shaohong on 2017/5/m1.
  */
 
 public class User {

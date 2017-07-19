@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/list_item_bg"
+                android:descendantFocusability="blocksDescendants"
+                android:gravity="center_vertical"
+                android:paddingBottom="5dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp" >
+
+    <TextView
+        android:id="@+id/notice_type_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="5dp"
+        android:background="@color/aqua"
+        android:text="考试通知"/>
+
+    <TextView
+        android:id="@+id/dt_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:textColor="@color/red"
+        android:text="2017-07-15 14:30:21"/>
+
+    <TextView
+        android:id="@+id/notice_title_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/notice_type_text_view"
+        android:textColor="@color/black"
+        android:text="您有一个考试通知"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/status_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/notice_title_text_view"
+        android:layout_alignLeft="@id/title"
+        android:textColor="@color/pink"
+        android:text="已确认"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/status_text_view"
+        android:textColor="@color/grey"
+        android:layout_alignParentRight="true"
+        android:text=">>"/>
+</RelativeLayout>

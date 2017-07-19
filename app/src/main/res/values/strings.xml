@@ -9,7 +9,7 @@
 
     <!-- 底部导航菜单 -->
     <string name="nav_title_home">首页</string>
-    <string name="nav_title_course">课程</string>
+    <string name="nav_title_course">培训</string>
     <string name="nav_title_exam">考试</string>
     <string name="nav_title_personal">我</string>
 
@@ -21,8 +21,8 @@
     <string name="soft_update_cancel">取消</string>
     <string name="soft_updating">正在下载，请稍候...</string>
     <string name="title_1_exam">获得学分</string>
-    <string name="title_2_exam">正确率</string>
-    <string name="title_3_exam">答题次数</string>
+    <string name="title_2_exam">已参加考试</string>
+    <string name="title_3_exam">正确率</string>
 
     <string name="loading">加载中…</string>
     <string name="sign_exam">（扫码签到）</string>

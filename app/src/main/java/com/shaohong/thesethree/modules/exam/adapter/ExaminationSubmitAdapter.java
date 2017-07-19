@@ -1,1800 +1,658 @@
 package com.shaohong.thesethree.modules.exam.adapter;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.shaohong.thesethree.R;
-import com.shaohong.thesethree.bean.AnSwerInfo;
-import com.shaohong.thesethree.bean.ErrorQuestionInfo;
-import com.shaohong.thesethree.bean.SaveQuestionInfo;
+import com.shaohong.thesethree.activities.MainActivity;
+import com.shaohong.thesethree.bean.Exam;
+import com.shaohong.thesethree.bean.Paper;
+import com.shaohong.thesethree.bean.UserAnswer;
 import com.shaohong.thesethree.database.DbManager;
+import com.shaohong.thesethree.model.ExamModel;
+import com.shaohong.thesethree.model.UserModel;
 import com.shaohong.thesethree.modules.exam.ExamActivity;
-import com.shaohong.thesethree.modules.exam.MyErrorQuestionActivity;
+import com.shaohong.thesethree.myview.MyGridView;
 import com.shaohong.thesethree.utils.ConstantUtils;
+import com.shaohong.thesethree.utils.ContextUtils;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
+import android.support.v7.app.AlertDialog;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class ExaminationSubmitAdapter extends PagerAdapter {
-	
-	ExamActivity mContext;
-	// 传递过来的页面view的集合
-	List<View> viewItems;
-	// 每个item的页面view
-	View convertView;
-	// 传递过来的所有数据
-	List<AnSwerInfo> dataItems;
-	
-	String imgServerUrl="";
 
-	private Map<Integer, Boolean> map = new HashMap<Integer, Boolean>();
-	private Map<Integer, Boolean> mapClick = new HashMap<Integer, Boolean>();
-	private Map<Integer, String> mapMultiSelect = new HashMap<Integer, String>();
-	
-	boolean isClick=false;
-	
-	boolean isNext = false;
-	
-	StringBuffer answer=new StringBuffer();
-	StringBuffer answerLast=new StringBuffer();
-	StringBuffer answer1=new StringBuffer();
-	
-	DbManager dbManager;
-	
-	String isCorrect= ConstantUtils.isCorrect;//1对，0错
-	
-	int errortopicNum=0;
-	
-	String resultA="";
-	String resultB="";
-	String resultC="";
-	String resultD="";
-	String resultE="";
+    ExamActivity mContext;
+    List<View> viewItems;
+    View convertView;
+    Exam mExam;
+    private HashMap<String, String> userInfo;
 
-	public ExaminationSubmitAdapter(ExamActivity context, List<View> viewItems, List<AnSwerInfo> dataItems,String imgServerUrl) {
-		mContext = context;
-		this.viewItems = viewItems;
-		this.dataItems = dataItems;
-		this.imgServerUrl = imgServerUrl;
-		dbManager = new DbManager(context);
-		dbManager.openDB();
-	}
-	
-	public long getItemId(int position) {
-		return position;
-	}
+    public ExaminationSubmitAdapter(ExamActivity context, List<View> viewItems,Exam exam) {
+        mContext = context;
+        this.viewItems = viewItems;
+        userInfo= UserModel.getUserInfoMore(mContext);
+        mExam=exam;
+    }
 
-	@Override
-	public void destroyItem(ViewGroup container, int position, Object object) {
-		container.removeView(viewItems.get(position));
-	}
+    public long getItemId(int position) {
+        return position;
+    }
 
-	@Override
-	public Object instantiateItem(ViewGroup container,final int position) {
-		final ViewHolder holder = new ViewHolder();
-		convertView = viewItems.get(position);
-		holder.questionType = (TextView) convertView.findViewById(R.id.activity_prepare_test_no);
-		holder.question = (TextView) convertView.findViewById(R.id.activity_prepare_test_question);
-		holder.previousBtn = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_upLayout);
-		holder.nextBtn = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_nextLayout);
-		holder.nextText = (TextView) convertView.findViewById(R.id.menu_bottom_nextTV);
-		holder.errorBtn =(LinearLayout) convertView.findViewById(R.id.activity_prepare_test_errorLayout);
-		holder.totalText = (TextView) convertView.findViewById(R.id.activity_prepare_test_totalTv);
-		holder.nextImage = (ImageView) convertView.findViewById(R.id.menu_bottom_nextIV);
-		holder.wrongLayout = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_wrongLayout);
-		holder.explaindetailTv = (TextView) convertView.findViewById(R.id.activity_prepare_test_explaindetail);
-		holder.layoutA=(LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_a);
-		holder.layoutB=(LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_b);
-		holder.layoutC=(LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_c);
-		holder.layoutD=(LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_d);
-		holder.layoutE=(LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_e);
-		holder.ivA=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_a);
-		holder.ivB=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_b);
-		holder.ivC=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_c);
-		holder.ivD=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_d);
-		holder.ivE=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_e);
-		holder.tvA=(TextView) convertView.findViewById(R.id.vote_submit_select_text_a);
-		holder.tvB=(TextView) convertView.findViewById(R.id.vote_submit_select_text_b);
-		holder.tvC=(TextView) convertView.findViewById(R.id.vote_submit_select_text_c);
-		holder.tvD=(TextView) convertView.findViewById(R.id.vote_submit_select_text_d);
-		holder.tvE=(TextView) convertView.findViewById(R.id.vote_submit_select_text_e);
-		holder.ivA_=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_a_);
-		holder.ivB_=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_b_);
-		holder.ivC_=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_c_);
-		holder.ivD_=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_d_);
-		holder.ivE_=(ImageView) convertView.findViewById(R.id.vote_submit_select_image_e_);
-		
-		holder.totalText.setText(position+1+"/"+dataItems.size());
-		
-		holder.errorBtn.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				Intent intent=new Intent(mContext,MyErrorQuestionActivity.class);
-				mContext.startActivity(intent);
-			}
-		});
-		
-		if(dataItems.get(position).getOptionA().equals("")){
-			holder.layoutA.setVisibility(View.GONE);
-		}if(dataItems.get(position).getOptionB().equals("")){
-			holder.layoutB.setVisibility(View.GONE);
-		}if(dataItems.get(position).getOptionC().equals("")){
-			holder.layoutC.setVisibility(View.GONE);
-		}if(dataItems.get(position).getOptionD().equals("")){
-			holder.layoutD.setVisibility(View.GONE);
-		}if(dataItems.get(position).getOptionE().equals("")){
-			holder.layoutE.setVisibility(View.GONE);
-		}
-		
-		//判断是否文字图片题目
-			//文字题目
-			holder.ivA_.setVisibility(View.GONE);
-			holder.ivB_.setVisibility(View.GONE);
-			holder.ivC_.setVisibility(View.GONE);
-			holder.ivD_.setVisibility(View.GONE);
-			holder.ivE_.setVisibility(View.GONE);
-			holder.tvA.setVisibility(View.VISIBLE);
-			holder.tvB.setVisibility(View.VISIBLE);
-			holder.tvC.setVisibility(View.VISIBLE);
-			holder.tvD.setVisibility(View.VISIBLE);
-			holder.tvE.setVisibility(View.VISIBLE);
-			holder.tvA.setText("A." + dataItems.get(position).getOptionA());
-			holder.tvB.setText("B." + dataItems.get(position).getOptionB());
-			holder.tvC.setText("C." + dataItems.get(position).getOptionC());
-			holder.tvD.setText("D." + dataItems.get(position).getOptionD());
-			holder.tvE.setText("E." + dataItems.get(position).getOptionE());
-			
-		//判断题型
-		if(dataItems.get(position).getQuestionType().equals("0")){
-			//单选题
-			
-			holder.question.setText("(单选题)"+dataItems.get(position).getQuestionName());
-			
-			holder.layoutA.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					if(map.containsKey(position)){
-						return;
-					}
-					map.put(position, true);
-					
-					if(dataItems.get(position).getCorrectAnswer().contains("A")){
-						mContext.setCurrentView(position+1);
-						holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-					}else{
-						isCorrect=ConstantUtils.isError;
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("A");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						holder.ivA.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvA.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-					}
-					//保存数据
-					SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-					questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-					questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-					questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-					questionInfo.setScore(dataItems.get(position).getScore());
-					questionInfo.setIs_correct(isCorrect);
-					mContext.questionInfos.add(questionInfo);
-					dataItems.get(position).setIsSelect("0");
-				}
-			});
-			holder.layoutB.setOnClickListener(new OnClickListener() {
-							
-							@Override
-							public void onClick(View arg0) {
-								if(map.containsKey(position)){
-									return;
-								}
-								map.put(position, true);
-								if(dataItems.get(position).getCorrectAnswer().contains("B")){
-									mContext.setCurrentView(position+1);
-									holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-									holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-									isCorrect=ConstantUtils.isCorrect;
-								}else{
-									isCorrect=ConstantUtils.isError;
-									errortopicNum+=1;
-									//自动添加错误题目
-									ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-									errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-									errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-									errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-									errorQuestionInfo.setIsRight(isCorrect);
-									errorQuestionInfo.setQuestionSelect("B");
-									errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-									errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-									if(dataItems.get(position).getOption_type().equals("0")){
-										errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-										errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-										errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-										errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-										errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-									}else{
-										errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-										errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-										errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-										errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-										errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-									}
-									long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-									
-									if(colunm == -1)
-									{
-										Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-									}
-									
-									holder.ivB.setImageResource(R.drawable.ic_practice_test_wrong);
-									holder.tvB.setTextColor(Color.parseColor("#d53235"));
-									//提示
-									holder.wrongLayout.setVisibility(View.VISIBLE);
-									holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-									//显示正确选项
-									if(dataItems.get(position).getCorrectAnswer().contains("A")){
-										holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-									}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-										holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-									}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-										holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-									}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-										holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-									}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-										holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-									}
-								}
-								//保存数据
-								SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-								questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-								questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-								questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-								questionInfo.setScore(dataItems.get(position).getScore());
-								questionInfo.setIs_correct(isCorrect);
-								mContext.questionInfos.add(questionInfo);
-								dataItems.get(position).setIsSelect("0");
-							}
-						});
-			holder.layoutC.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					if(map.containsKey(position)){
-						return;
-					}
-					map.put(position, true);
-					if(dataItems.get(position).getCorrectAnswer().contains("C")){
-						mContext.setCurrentView(position+1);
-						holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-					}else{
-						isCorrect=ConstantUtils.isError;
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("C");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						holder.ivC.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvC.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-					}
-					//保存数据
-					SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-					questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-					questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-					questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-					questionInfo.setScore(dataItems.get(position).getScore());
-					questionInfo.setIs_correct(isCorrect);
-					mContext.questionInfos.add(questionInfo);
-					dataItems.get(position).setIsSelect("0");
-				}
-			});
-			holder.layoutD.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					if(map.containsKey(position)){
-						return;
-					}
-					map.put(position, true);
-					if(dataItems.get(position).getCorrectAnswer().contains("D")){
-						mContext.setCurrentView(position+1);
-						holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect= ConstantUtils.isCorrect;
-					}else{
-						isCorrect=ConstantUtils.isError;
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("D");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						holder.ivD.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvD.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-					}
-					//保存数据
-					SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-					questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-					questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-					questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-					questionInfo.setScore(dataItems.get(position).getScore());
-					questionInfo.setIs_correct(isCorrect);
-					mContext.questionInfos.add(questionInfo);
-					dataItems.get(position).setIsSelect("0");
-				}
-			});
-			holder.layoutE.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					if(map.containsKey(position)){
-						return;
-					}
-					map.put(position, true);
-					if(dataItems.get(position).getCorrectAnswer().contains("E")){
-						mContext.setCurrentView(position+1);
-						holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-					}else{
-						isCorrect=ConstantUtils.isError;
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("E");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						holder.ivE.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvE.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-					}
-					//保存数据
-					SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-					questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-					questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-					questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-					questionInfo.setScore(dataItems.get(position).getScore());
-					questionInfo.setIs_correct(isCorrect);
-					mContext.questionInfos.add(questionInfo);
-					dataItems.get(position).setIsSelect("0");
-				}
-			});
-		}else if(dataItems.get(position).getQuestionType().equals("1")){
-			//多选题
-			holder.question.setText("(多选题)"+dataItems.get(position).getQuestionName());
-			
-			holder.layoutA.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					mapClick.put(position, true);
-					if(map.containsKey(position)){
-						return;
-					}
-					if(dataItems.get(position).getCorrectAnswer().contains("A")){
-						holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-						if(position==viewItems.size()-1){
-							answerLast.append("A");
-						}else{
-							answer.append("A");
-						}
-					}else{
-						isCorrect=ConstantUtils.isError;
-						mapMultiSelect.put(position, isCorrect);
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("A");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						map.put(position, true);
-						holder.ivA.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvA.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-						
-						//保存数据
-						SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-						questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-						questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-						questionInfo.setScore(dataItems.get(position).getScore());
-						questionInfo.setIs_correct(isCorrect);
-						mContext.questionInfos.add(questionInfo);
-						dataItems.get(position).setIsSelect("0");
-					}
-					resultA="A";
-				}
-			});
-			holder.layoutB.setOnClickListener(new OnClickListener() {
-							
-							@Override
-							public void onClick(View arg0) {
-								mapClick.put(position, true);
-								if(map.containsKey(position)){
-									return;
-								}
-								if(dataItems.get(position).getCorrectAnswer().contains("B")){
-									holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-									holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-									isCorrect=ConstantUtils.isCorrect;
-									if(position==viewItems.size()-1){
-										answerLast.append("B");
-									}else{
-										answer.append("B");
-									}
-								}else{
-									isCorrect=ConstantUtils.isError;
-									mapMultiSelect.put(position, isCorrect);
-									errortopicNum+=1;
-									//自动添加错误题目
-									ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-									errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-									errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-									errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-									errorQuestionInfo.setIsRight(isCorrect);
-									errorQuestionInfo.setQuestionSelect("B");
-									errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-									errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-									if(dataItems.get(position).getOption_type().equals("0")){
-										errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-										errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-										errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-										errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-										errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-									}else{
-										errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-										errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-										errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-										errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-										errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-									}
-									long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-									
-									if(colunm == -1)
-									{
-										Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-									}
-									
-									map.put(position, true);
-									holder.ivB.setImageResource(R.drawable.ic_practice_test_wrong);
-									holder.tvB.setTextColor(Color.parseColor("#d53235"));
-									//提示
-									holder.wrongLayout.setVisibility(View.VISIBLE);
-									holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-									//显示正确选项
-									if(dataItems.get(position).getCorrectAnswer().contains("A")){
-										holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-									}if(dataItems.get(position).getCorrectAnswer().contains("B")){
-										holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-									}if(dataItems.get(position).getCorrectAnswer().contains("C")){
-										holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-									}if(dataItems.get(position).getCorrectAnswer().contains("D")){
-										holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-									}if(dataItems.get(position).getCorrectAnswer().contains("E")){
-										holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-									}
-									
-									//保存数据
-									SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-									questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-									questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-									questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-									questionInfo.setScore(dataItems.get(position).getScore());
-									questionInfo.setIs_correct(isCorrect);
-									mContext.questionInfos.add(questionInfo);
-									dataItems.get(position).setIsSelect("0");
-								}
-								resultB="B";
-							}
-						});
-			holder.layoutC.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					mapClick.put(position, true);
-					if(map.containsKey(position)){
-						return;
-					}
-					if(dataItems.get(position).getCorrectAnswer().contains("C")){
-						holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-						if(position==viewItems.size()-1){
-							answerLast.append("C");
-						}else{
-							answer.append("C");
-						}
-					}else{
-						isCorrect=ConstantUtils.isError;
-						mapMultiSelect.put(position, isCorrect);
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("C");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						map.put(position, true);
-						holder.ivC.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvC.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-						
-						//保存数据
-						SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-						questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-						questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-						questionInfo.setScore(dataItems.get(position).getScore());
-						questionInfo.setIs_correct(isCorrect);
-						mContext.questionInfos.add(questionInfo);
-						dataItems.get(position).setIsSelect("0");
-					}
-					resultC="C";
-				}
-			});
-			holder.layoutD.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					mapClick.put(position, true);
-					if(map.containsKey(position)){
-						return;
-					}
-					if(dataItems.get(position).getCorrectAnswer().contains("D")){
-						holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-						if(position==viewItems.size()-1){
-							answerLast.append("D");
-						}else{
-							answer.append("D");
-						}
-					}else{
-						isCorrect=ConstantUtils.isError;
-						mapMultiSelect.put(position, isCorrect);
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("D");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						map.put(position, true);
-						holder.ivD.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvD.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-						
-						//保存数据
-						SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-						questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-						questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-						questionInfo.setScore(dataItems.get(position).getScore());
-						questionInfo.setIs_correct(isCorrect);
-						mContext.questionInfos.add(questionInfo);
-						dataItems.get(position).setIsSelect("0");
-					}
-					resultD="D";
-				}
-			});
-			holder.layoutE.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					mapClick.put(position, true);
-					if(map.containsKey(position)){
-						return;
-					}
-					if(dataItems.get(position).getCorrectAnswer().contains("E")){
-						holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-						if(position==viewItems.size()-1){
-							answerLast.append("E");
-						}else{
-							answer.append("E");
-						}
-					}else{
-						isCorrect=ConstantUtils.isError;
-						mapMultiSelect.put(position, isCorrect);
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("E");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						map.put(position, true);
-						holder.ivE.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvE.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-						
-						//保存数据
-						SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-						questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-						questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-						questionInfo.setScore(dataItems.get(position).getScore());
-						questionInfo.setIs_correct(isCorrect);
-						mContext.questionInfos.add(questionInfo);
-						dataItems.get(position).setIsSelect("0");
-					}
-					resultE="E";
-				}
-			});
-			
-		}else{
-			//判断题
-			holder.question.setText("(判断题)"+dataItems.get(position).getQuestionName());
-			holder.layoutA.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					if(map.containsKey(position)){
-						return;
-					}
-					map.put(position, true);
-					if(dataItems.get(position).getCorrectAnswer().contains("A")){
-						mContext.setCurrentView(position+1);
-						holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-					}else{
-						isCorrect=ConstantUtils.isError;
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("A");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						holder.ivA.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvA.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-					}
-					//保存数据
-					SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-					questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-					questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-					questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-					questionInfo.setScore(dataItems.get(position).getScore());
-					questionInfo.setIs_correct(isCorrect);
-					mContext.questionInfos.add(questionInfo);
-					dataItems.get(position).setIsSelect("0");
-				}
-			});
-			holder.layoutB.setOnClickListener(new OnClickListener() {
-							
-							@Override
-							public void onClick(View arg0) {
-								if(map.containsKey(position)){
-									return;
-								}
-								map.put(position, true);
-								if(dataItems.get(position).getCorrectAnswer().contains("B")){
-									mContext.setCurrentView(position+1);
-									holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-									holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-									isCorrect=ConstantUtils.isCorrect;
-								}else{
-									isCorrect=ConstantUtils.isError;
-									errortopicNum+=1;
-									//自动添加错误题目
-									ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-									errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-									errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-									errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-									errorQuestionInfo.setIsRight(isCorrect);
-									errorQuestionInfo.setQuestionSelect("B");
-									errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-									errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-									if(dataItems.get(position).getOption_type().equals("0")){
-										errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-										errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-										errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-										errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-										errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-									}else{
-										errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-										errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-										errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-										errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-										errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-									}
-									long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-									
-									if(colunm == -1)
-									{
-										Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-									}
-									
-									holder.ivB.setImageResource(R.drawable.ic_practice_test_wrong);
-									holder.tvB.setTextColor(Color.parseColor("#d53235"));
-									//提示
-									holder.wrongLayout.setVisibility(View.VISIBLE);
-									holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-									//显示正确选项
-									if(dataItems.get(position).getCorrectAnswer().contains("A")){
-										holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-									}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-										holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-									}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-										holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-									}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-										holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-									}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-										holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-										holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-									}
-								}
-								//保存数据
-								SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-								questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-								questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-								questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-								questionInfo.setScore(dataItems.get(position).getScore());
-								questionInfo.setIs_correct(isCorrect);
-								mContext.questionInfos.add(questionInfo);
-								dataItems.get(position).setIsSelect("0");
-							}
-						});
-			holder.layoutC.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					if(map.containsKey(position)){
-						return;
-					}
-					map.put(position, true);
-					if(dataItems.get(position).getCorrectAnswer().contains("C")){
-						mContext.setCurrentView(position+1);
-						holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-					}else{
-						isCorrect=ConstantUtils.isError;
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("C");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						holder.ivC.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvC.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-					}
-					//保存数据
-					SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-					questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-					questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-					questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-					questionInfo.setScore(dataItems.get(position).getScore());
-					questionInfo.setIs_correct(isCorrect);
-					mContext.questionInfos.add(questionInfo);
-					dataItems.get(position).setIsSelect("0");
-				}
-			});
-			holder.layoutD.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					if(map.containsKey(position)){
-						return;
-					}
-					map.put(position, true);
-					if(dataItems.get(position).getCorrectAnswer().contains("D")){
-						mContext.setCurrentView(position+1);
-						holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-					}else{
-						isCorrect=ConstantUtils.isError;
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("D");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						holder.ivD.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvD.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-					}
-					//保存数据
-					SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-					questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-					questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-					questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-					questionInfo.setScore(dataItems.get(position).getScore());
-					questionInfo.setIs_correct(isCorrect);
-					mContext.questionInfos.add(questionInfo);
-					dataItems.get(position).setIsSelect("0");
-				}
-			});
-			holder.layoutE.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View arg0) {
-					if(map.containsKey(position)){
-						return;
-					}
-					map.put(position, true);
-					if(dataItems.get(position).getCorrectAnswer().contains("E")){
-						mContext.setCurrentView(position+1);
-						holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-						holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						isCorrect=ConstantUtils.isCorrect;
-					}else{
-						isCorrect=ConstantUtils.isError;
-						errortopicNum+=1;
-						//自动添加错误题目
-						ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-						errorQuestionInfo.setQuestionName(dataItems.get(position).getQuestionName());
-						errorQuestionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-						errorQuestionInfo.setQuestionAnswer(dataItems.get(position).getCorrectAnswer());
-						errorQuestionInfo.setIsRight(isCorrect);
-						errorQuestionInfo.setQuestionSelect("E");
-						errorQuestionInfo.setAnalysis(dataItems.get(position).getAnalysis());
-						errorQuestionInfo.setOptionType(dataItems.get(position).getOption_type());
-						if(dataItems.get(position).getOption_type().equals("0")){
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE());
-						}else{
-							errorQuestionInfo.setOptionA(dataItems.get(position).getOptionA().equals("")?"":imgServerUrl+dataItems.get(position).getOptionA());
-							errorQuestionInfo.setOptionB(dataItems.get(position).getOptionB().equals("")?"":imgServerUrl+dataItems.get(position).getOptionB());
-							errorQuestionInfo.setOptionC(dataItems.get(position).getOptionC().equals("")?"":imgServerUrl+dataItems.get(position).getOptionC());
-							errorQuestionInfo.setOptionD(dataItems.get(position).getOptionD().equals("")?"":imgServerUrl+dataItems.get(position).getOptionD());
-							errorQuestionInfo.setOptionE(dataItems.get(position).getOptionE().equals("")?"":imgServerUrl+dataItems.get(position).getOptionE());
-						}
-						long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-						
-						if(colunm == -1)
-						{
-							Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-						}
-						
-						holder.ivE.setImageResource(R.drawable.ic_practice_test_wrong);
-						holder.tvE.setTextColor(Color.parseColor("#d53235"));
-						//提示
-						holder.wrongLayout.setVisibility(View.VISIBLE);
-						holder.explaindetailTv.setText(""+dataItems.get(position).getAnalysis());
-						//显示正确选项
-						if(dataItems.get(position).getCorrectAnswer().contains("A")){
-							holder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvA.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("B")){
-							holder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvB.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("C")){
-							holder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvC.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("D")){
-							holder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvD.setTextColor(Color.parseColor("#61bc31"));
-						}else if(dataItems.get(position).getCorrectAnswer().contains("E")){
-							holder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-							holder.tvE.setTextColor(Color.parseColor("#61bc31"));
-						}
-					}
-					//保存数据
-					SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-					questionInfo.setQuestionId(dataItems.get(position).getQuestionId());
-					questionInfo.setQuestionType(dataItems.get(position).getQuestionType());
-					questionInfo.setRealAnswer(dataItems.get(position).getCorrectAnswer());
-					questionInfo.setScore(dataItems.get(position).getScore());
-					questionInfo.setIs_correct(isCorrect);
-					mContext.questionInfos.add(questionInfo);
-					dataItems.get(position).setIsSelect("0");
-				}
-			});
-		}
-		
-		ForegroundColorSpan blueSpan = new ForegroundColorSpan(Color.parseColor("#2b89e9"));
-		
-		SpannableStringBuilder builder1 = new SpannableStringBuilder(holder.question.getText().toString());
-		builder1.setSpan(blueSpan, 0, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		holder.question.setText(builder1);
-		
-		// 最后一页修改"下一步"按钮文字
-		if (position == viewItems.size() - 1) {
-			holder.nextText.setText("提交");
-			holder.nextImage.setImageResource(R.drawable.vote_submit_finish);
-		}
-		holder.previousBtn.setOnClickListener(new LinearOnClickListener(position - 1, false,position,holder));
-		holder.nextBtn.setOnClickListener(new LinearOnClickListener(position + 1, true,position,holder));
-		container.addView(viewItems.get(position));
-		return viewItems.get(position);
-	}
-	
-	/**
-	 * @author  设置上一步和下一步按钮监听
-	 * 
-	 */
-	class LinearOnClickListener implements OnClickListener {
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        container.removeView(viewItems.get(position));
+    }
 
-		private int mPosition;
-		private int mPosition1;
-		private boolean mIsNext;
-		private ViewHolder viewHolder;
+    @Override
+    public Object instantiateItem(ViewGroup container, final int position) {
+        final ViewHolder holder = new ViewHolder();
+        convertView = viewItems.get(position);
+        holder.questionType = (TextView) convertView.findViewById(R.id.activity_prepare_test_no);
+        holder.question = (TextView) convertView.findViewById(R.id.activity_prepare_test_question);
+        holder.previousBtn = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_upLayout);
+        holder.nextBtn = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_nextLayout);
+        holder.totalBtn = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_totalLayout);
+        holder.nextText = (TextView) convertView.findViewById(R.id.menu_bottom_nextTV);
+        holder.totalText = (TextView) convertView.findViewById(R.id.activity_prepare_test_totalTv);
+        holder.nextImage = (ImageView) convertView.findViewById(R.id.menu_bottom_nextIV);
+        holder.layoutA = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_a);
+        holder.layoutB = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_b);
+        holder.layoutC = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_c);
+        holder.layoutD = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_d);
+        holder.layoutE = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_e);
+        holder.layoutF = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_f);
+        holder.layoutG = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_g);
+        holder.layoutH = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_h);
+        holder.layoutI = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_i);
+        holder.layoutJ = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_j);
+        holder.cbA = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_a);
+        holder.cbB = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_b);
+        holder.cbC = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_c);
+        holder.cbD = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_d);
+        holder.cbE = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_e);
+        holder.cbF = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_f);
+        holder.cbG = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_g);
+        holder.cbH = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_h);
+        holder.cbI = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_i);
+        holder.cbJ = (CheckBox) convertView.findViewById(R.id.vote_submit_select_image_j);
+        holder.tvA = (TextView) convertView.findViewById(R.id.vote_submit_select_text_a);
+        holder.tvB = (TextView) convertView.findViewById(R.id.vote_submit_select_text_b);
+        holder.tvC = (TextView) convertView.findViewById(R.id.vote_submit_select_text_c);
+        holder.tvD = (TextView) convertView.findViewById(R.id.vote_submit_select_text_d);
+        holder.tvE = (TextView) convertView.findViewById(R.id.vote_submit_select_text_e);
+        holder.tvF = (TextView) convertView.findViewById(R.id.vote_submit_select_text_f);
+        holder.tvG = (TextView) convertView.findViewById(R.id.vote_submit_select_text_g);
+        holder.tvH = (TextView) convertView.findViewById(R.id.vote_submit_select_text_h);
+        holder.tvI = (TextView) convertView.findViewById(R.id.vote_submit_select_text_i);
+        holder.tvJ = (TextView) convertView.findViewById(R.id.vote_submit_select_text_j);
+        holder.totalText.setText(position + 1 + "/" + ContextUtils.mPapers.size());
 
-		public LinearOnClickListener(int position, boolean mIsNext,int position1,ViewHolder viewHolder) {
-			mPosition = position;
-			mPosition1 = position1;
-			this.viewHolder = viewHolder;
-			this.mIsNext = mIsNext;
-		}
+        if (ContextUtils.mPapers.get(position).getItemA().equals("")) {
+            holder.layoutA.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemB().equals("")) {
+            holder.layoutB.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemC().equals("")) {
+            holder.layoutC.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemD().equals("")) {
+            holder.layoutD.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemE().equals("")) {
+            holder.layoutE.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemF().equals("")) {
+            holder.layoutF.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemG().equals("")) {
+            holder.layoutG.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemH().equals("")) {
+            holder.layoutH.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemI().equals("")) {
+            holder.layoutI.setVisibility(View.GONE);
+        }
+        if (ContextUtils.mPapers.get(position).getItemJ().equals("")) {
+            holder.layoutJ.setVisibility(View.GONE);
+        }
 
-		@Override
-		public void onClick(View v) {
-				if (mPosition == viewItems.size()) {
-					//单选
-					if(dataItems.get(mPosition1).getQuestionType().equals("0")){
-						if(!map.containsKey(mPosition1)){
-							Toast.makeText(mContext, "请选择选项", Toast.LENGTH_SHORT).show();
-							return;
-						}
-						mContext.uploadExamination(errortopicNum);
-					}else if(dataItems.get(mPosition1).getQuestionType().equals("1")){
-						//判断多选时的点击
-						if(!map.containsKey(mPosition1)){
-							if(!mapClick.containsKey(mPosition1)){
-								Toast.makeText(mContext, "请选择选项", Toast.LENGTH_SHORT).show();
-								return;
-							}
-						}
-						map.put(mPosition1, true);
-						
-						if(mapMultiSelect.containsKey(mPosition1)){
-							//提交答题
-							mContext.uploadExamination(errortopicNum);
-						}else{
-							String ssStr=dataItems.get(mPosition1).getCorrectAnswer();
-							ssStr=ssStr.replace("|", "");
-							
-							if(mPosition == viewItems.size()){
-								if(answerLast.toString().contains("A")){
-									answer1.append("A");
-								}if(answerLast.toString().contains("B")){
-									answer1.append("B");
-								}if(answerLast.toString().contains("C")){
-									answer1.append("C");
-								}if(answerLast.toString().contains("D")){
-									answer1.append("D");
-								}if(answerLast.toString().contains("E")){
-									answer1.append("E");
-								}
-								
-							}else{
-								if(answer.toString().contains("A")){
-									answer1.append("A");
-								}if(answer.toString().contains("B")){
-									answer1.append("B");
-								}if(answer.toString().contains("C")){
-									answer1.append("C");
-								}if(answer.toString().contains("D")){
-									answer1.append("D");
-								}if(answer.toString().contains("E")){
-									answer1.append("E");
-								}
-							}
-							
-							if(answer1.toString().equals(ssStr)){
-								//清除答案
-								answer.delete(0, answer.length());
-								answer1.delete(0, answer1.length());
-								isCorrect=ConstantUtils.isCorrect;
-								mapMultiSelect.put(mPosition1, ConstantUtils.isCorrect);
-								//保存数据
-								SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-								questionInfo.setQuestionId(dataItems.get(mPosition1).getQuestionId());
-								questionInfo.setQuestionType(dataItems.get(mPosition1).getQuestionType());
-								questionInfo.setRealAnswer(dataItems.get(mPosition1).getCorrectAnswer());
-								questionInfo.setScore(dataItems.get(mPosition1).getScore());
-								questionInfo.setIs_correct(isCorrect);
-								mContext.questionInfos.add(questionInfo);
-								dataItems.get(mPosition1).setIsSelect("0");
-								//提交答题
-								mContext.uploadExamination(errortopicNum);
-							}else{
-								//清除答案
-								answer.delete(0, answer.length());
-								answer1.delete(0, answer1.length());
-								errortopicNum+=1;
-								isCorrect=ConstantUtils.isError;
-								//自动添加错误题目
-								ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-								errorQuestionInfo.setQuestionName(dataItems.get(mPosition1).getQuestionName());
-								errorQuestionInfo.setQuestionType(dataItems.get(mPosition1).getQuestionType());
-								errorQuestionInfo.setQuestionAnswer(dataItems.get(mPosition1).getCorrectAnswer());
-								errorQuestionInfo.setIsRight(isCorrect);
-								errorQuestionInfo.setQuestionSelect(answer.toString());
-								errorQuestionInfo.setAnalysis(dataItems.get(mPosition1).getAnalysis());
-								errorQuestionInfo.setOptionType(dataItems.get(mPosition1).getOption_type());
-								if(dataItems.get(mPosition1).getOption_type().equals("0")){
-									errorQuestionInfo.setOptionA(dataItems.get(mPosition1).getOptionA());
-									errorQuestionInfo.setOptionB(dataItems.get(mPosition1).getOptionB());
-									errorQuestionInfo.setOptionC(dataItems.get(mPosition1).getOptionC());
-									errorQuestionInfo.setOptionD(dataItems.get(mPosition1).getOptionD());
-									errorQuestionInfo.setOptionE(dataItems.get(mPosition1).getOptionE());
-								}else{
-									errorQuestionInfo.setOptionA(dataItems.get(mPosition1).getOptionA().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionA());
-									errorQuestionInfo.setOptionB(dataItems.get(mPosition1).getOptionB().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionB());
-									errorQuestionInfo.setOptionC(dataItems.get(mPosition1).getOptionC().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionC());
-									errorQuestionInfo.setOptionD(dataItems.get(mPosition1).getOptionD().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionD());
-									errorQuestionInfo.setOptionE(dataItems.get(mPosition1).getOptionE().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionE());
-								}
-								long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-								
-								if(colunm == -1)
-								{
-									Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-								}
-								isCorrect=ConstantUtils.isError;
-								mapMultiSelect.put(mPosition1, ConstantUtils.isError);
-								
-								//提示
-								viewHolder.wrongLayout.setVisibility(View.VISIBLE);
-								viewHolder.explaindetailTv.setText(""+dataItems.get(mPosition1).getAnalysis());
-								//保存数据
-								SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-								questionInfo.setQuestionId(dataItems.get(mPosition1).getQuestionId());
-								questionInfo.setQuestionType(dataItems.get(mPosition1).getQuestionType());
-								questionInfo.setRealAnswer(dataItems.get(mPosition1).getCorrectAnswer());
-								questionInfo.setScore(dataItems.get(mPosition1).getScore());
-								questionInfo.setIs_correct(isCorrect);
-								mContext.questionInfos.add(questionInfo);
-								dataItems.get(mPosition1).setIsSelect("0");
-								//显示正确选项
-								if(dataItems.get(mPosition1).getCorrectAnswer().contains("A")){
-									viewHolder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-									viewHolder.tvA.setTextColor(Color.parseColor("#61bc31"));
-								}
-								if(dataItems.get(mPosition1).getCorrectAnswer().contains("B")){
-									viewHolder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-									viewHolder.tvB.setTextColor(Color.parseColor("#61bc31"));
-								}
-								if(dataItems.get(mPosition1).getCorrectAnswer().contains("C")){
-									viewHolder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-									viewHolder.tvC.setTextColor(Color.parseColor("#61bc31"));
-								}
-								if(dataItems.get(mPosition1).getCorrectAnswer().contains("D")){
-									viewHolder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-									viewHolder.tvD.setTextColor(Color.parseColor("#61bc31"));
-								}
-								if(dataItems.get(mPosition1).getCorrectAnswer().contains("E")){
-									viewHolder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-									viewHolder.tvE.setTextColor(Color.parseColor("#61bc31"));
-								}
-								
-							}
-							
-						}
-					}else{
-						if(!map.containsKey(mPosition1)){
-							Toast.makeText(mContext, "请选择选项", Toast.LENGTH_SHORT).show();
-							return;
-						}
-						mContext.uploadExamination(errortopicNum);
-					}
-				} else {
-					if(mPosition ==-1){
-						Toast.makeText(mContext, "已经是第一页", Toast.LENGTH_SHORT).show();
-						return;
-					}else{
-						//单选
-						if(dataItems.get(mPosition1).getQuestionType().equals("0")){
-							if(mIsNext){
-								if(!map.containsKey(mPosition1)){
-									Toast.makeText(mContext, "请选择选项", Toast.LENGTH_SHORT).show();
-									return;
-								}
-							}
-							isNext = mIsNext;
-							mContext.setCurrentView(mPosition);
-						}else if(dataItems.get(mPosition1).getQuestionType().equals("1")){
-							if(mIsNext){
-								//判断多选时的点击
-								if(!map.containsKey(mPosition1)){
-									if(!mapClick.containsKey(mPosition1)){
-										Toast.makeText(mContext, "请选择选项", Toast.LENGTH_SHORT).show();
-										return;
-									}
-								}
-								map.put(mPosition1, true);
-								
-								if(mapMultiSelect.containsKey(mPosition1)){
-									//清除答案
-									answer.delete(0, answer.length());
-									//选过的，直接跳转下一题
-									isNext = mIsNext;
-									mContext.setCurrentView(mPosition);
-								}else{
-									String ssStr=dataItems.get(mPosition1).getCorrectAnswer();
-									ssStr=ssStr.replace("|", "");
-									if(answer.toString().contains("A")){
-										answer1.append("A");
-									}if(answer.toString().contains("B")){
-										answer1.append("B");
-									}if(answer.toString().contains("C")){
-										answer1.append("C");
-									}if(answer.toString().contains("D")){
-										answer1.append("D");
-									}if(answer.toString().contains("E")){
-										answer1.append("E");
-									}
-									if(answer1.toString().equals(ssStr)){
-										//清除答案
-										answer.delete(0, answer.length());
-										answer1.delete(0, answer1.length());
-										isCorrect=ConstantUtils.isCorrect;
-										mapMultiSelect.put(mPosition1, ConstantUtils.isCorrect);
-										//保存数据
-										SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-										questionInfo.setQuestionId(dataItems.get(mPosition1).getQuestionId());
-										questionInfo.setQuestionType(dataItems.get(mPosition1).getQuestionType());
-										questionInfo.setRealAnswer(dataItems.get(mPosition1).getCorrectAnswer());
-										questionInfo.setScore(dataItems.get(mPosition1).getScore());
-										questionInfo.setIs_correct(isCorrect);
-										mContext.questionInfos.add(questionInfo);
-										dataItems.get(mPosition1).setIsSelect("0");
-										isNext = mIsNext;
-										mContext.setCurrentView(mPosition);
-									}else{
-										//清除答案
-										answer.delete(0, answer.length());
-										answer1.delete(0, answer1.length());
-										errortopicNum+=1;
-										isCorrect=ConstantUtils.isError;
-										//自动添加错误题目
-										ErrorQuestionInfo errorQuestionInfo=new ErrorQuestionInfo();
-										errorQuestionInfo.setQuestionName(dataItems.get(mPosition1).getQuestionName());
-										errorQuestionInfo.setQuestionType(dataItems.get(mPosition1).getQuestionType());
-										errorQuestionInfo.setQuestionAnswer(dataItems.get(mPosition1).getCorrectAnswer());
-										errorQuestionInfo.setIsRight(isCorrect);
-										errorQuestionInfo.setQuestionSelect(answer.toString());
-										errorQuestionInfo.setAnalysis(dataItems.get(mPosition1).getAnalysis());
-										errorQuestionInfo.setOptionType(dataItems.get(mPosition1).getOption_type());
-										if(dataItems.get(mPosition1).getOption_type().equals("0")){
-											errorQuestionInfo.setOptionA(dataItems.get(mPosition1).getOptionA());
-											errorQuestionInfo.setOptionB(dataItems.get(mPosition1).getOptionB());
-											errorQuestionInfo.setOptionC(dataItems.get(mPosition1).getOptionC());
-											errorQuestionInfo.setOptionD(dataItems.get(mPosition1).getOptionD());
-											errorQuestionInfo.setOptionE(dataItems.get(mPosition1).getOptionE());
-										}else{
-											errorQuestionInfo.setOptionA(dataItems.get(mPosition1).getOptionA().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionA());
-											errorQuestionInfo.setOptionB(dataItems.get(mPosition1).getOptionB().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionB());
-											errorQuestionInfo.setOptionC(dataItems.get(mPosition1).getOptionC().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionC());
-											errorQuestionInfo.setOptionD(dataItems.get(mPosition1).getOptionD().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionD());
-											errorQuestionInfo.setOptionE(dataItems.get(mPosition1).getOptionE().equals("")?"":imgServerUrl+dataItems.get(mPosition1).getOptionE());
-										}
-										long colunm=dbManager.insertErrorQuestion(errorQuestionInfo);
-										
-										if(colunm == -1)
-										{
-											Toast.makeText(mContext, "添加错误", Toast.LENGTH_SHORT).show();
-										}
-										isCorrect=ConstantUtils.isError;
-										mapMultiSelect.put(mPosition1, ConstantUtils.isError);
-										
-										//提示
-										viewHolder.wrongLayout.setVisibility(View.VISIBLE);
-										viewHolder.explaindetailTv.setText(""+dataItems.get(mPosition1).getAnalysis());
-										//保存数据
-										SaveQuestionInfo questionInfo=new SaveQuestionInfo();
-										questionInfo.setQuestionId(dataItems.get(mPosition1).getQuestionId());
-										questionInfo.setQuestionType(dataItems.get(mPosition1).getQuestionType());
-										questionInfo.setRealAnswer(dataItems.get(mPosition1).getCorrectAnswer());
-										questionInfo.setScore(dataItems.get(mPosition1).getScore());
-										questionInfo.setIs_correct(isCorrect);
-										mContext.questionInfos.add(questionInfo);
-										dataItems.get(mPosition1).setIsSelect("0");
-										//显示正确选项
-										if(dataItems.get(mPosition1).getCorrectAnswer().contains("A")){
-											viewHolder.ivA.setImageResource(R.drawable.ic_practice_test_right);
-											viewHolder.tvA.setTextColor(Color.parseColor("#61bc31"));
-										}
-										if(dataItems.get(mPosition1).getCorrectAnswer().contains("B")){
-											viewHolder.ivB.setImageResource(R.drawable.ic_practice_test_right);
-											viewHolder.tvB.setTextColor(Color.parseColor("#61bc31"));
-										}
-										if(dataItems.get(mPosition1).getCorrectAnswer().contains("C")){
-											viewHolder.ivC.setImageResource(R.drawable.ic_practice_test_right);
-											viewHolder.tvC.setTextColor(Color.parseColor("#61bc31"));
-										}
-										if(dataItems.get(mPosition1).getCorrectAnswer().contains("D")){
-											viewHolder.ivD.setImageResource(R.drawable.ic_practice_test_right);
-											viewHolder.tvD.setTextColor(Color.parseColor("#61bc31"));
-										}
-										if(dataItems.get(mPosition1).getCorrectAnswer().contains("E")){
-											viewHolder.ivE.setImageResource(R.drawable.ic_practice_test_right);
-											viewHolder.tvE.setTextColor(Color.parseColor("#61bc31"));
-										}
-									}
-								}
-							}else{
-								mContext.setCurrentView(mPosition);
-							}
-							
-						}else{
-							if(mIsNext){
-								if(!map.containsKey(mPosition1)){
-									Toast.makeText(mContext, "请选择选项", Toast.LENGTH_SHORT).show();
-									return;
-								}
-							}
-							
-							isNext = mIsNext;
-							mContext.setCurrentView(mPosition);
-						}
-					}
-				}
-			
-		}
+        holder.tvA.setVisibility(View.VISIBLE);
+        holder.tvB.setVisibility(View.VISIBLE);
+        holder.tvC.setVisibility(View.VISIBLE);
+        holder.tvD.setVisibility(View.VISIBLE);
+        holder.tvE.setVisibility(View.VISIBLE);
+        holder.tvF.setVisibility(View.VISIBLE);
+        holder.tvG.setVisibility(View.VISIBLE);
+        holder.tvH.setVisibility(View.VISIBLE);
+        holder.tvI.setVisibility(View.VISIBLE);
+        holder.tvJ.setVisibility(View.VISIBLE);
 
-	}
-	
-	@Override
-	public int getCount() {
-		if (viewItems == null)
-			return 0;
-		return viewItems.size();
-	}
+        holder.tvA.setText("A." + ContextUtils.mPapers.get(position).getItemA());
+        holder.tvB.setText("B." + ContextUtils.mPapers.get(position).getItemB());
+        holder.tvC.setText("C." + ContextUtils.mPapers.get(position).getItemC());
+        holder.tvD.setText("D." + ContextUtils.mPapers.get(position).getItemD());
+        holder.tvE.setText("E." + ContextUtils.mPapers.get(position).getItemE());
+        holder.tvE.setText("F." + ContextUtils.mPapers.get(position).getItemF());
+        holder.tvE.setText("G." + ContextUtils.mPapers.get(position).getItemG());
+        holder.tvE.setText("H." + ContextUtils.mPapers.get(position).getItemH());
+        holder.tvE.setText("I." + ContextUtils.mPapers.get(position).getItemI());
+        holder.tvE.setText("J." + ContextUtils.mPapers.get(position).getItemJ());
 
-	@Override
-	public boolean isViewFromObject(View arg0, Object arg1) {
-		return arg0 == arg1;
-	}
-	
-	//错题数
-	public int errorTopicNum(){
-		if(errortopicNum!=0){
-			return errortopicNum;
-		}
-		return 0;
-	}
+        String answer = ContextUtils.mPapers.get(position).getUserAnswer();
+        if (!answer.isEmpty() && answer.length() > 0) {
+            holder.cbA.setChecked(answer.contains("A"));
+            holder.cbB.setChecked(answer.contains("B"));
+            holder.cbC.setChecked(answer.contains("C"));
+            holder.cbD.setChecked(answer.contains("D"));
+            holder.cbE.setChecked(answer.contains("E"));
+            holder.cbF.setChecked(answer.contains("F"));
+            holder.cbG.setChecked(answer.contains("G"));
+            holder.cbH.setChecked(answer.contains("H"));
+            holder.cbI.setChecked(answer.contains("I"));
+            holder.cbJ.setChecked(answer.contains("J"));
+        }
 
-	public class ViewHolder {
-		TextView questionType;
-		TextView question;
-		LinearLayout previousBtn, nextBtn,errorBtn;
-		TextView nextText;
-		TextView totalText;
-		ImageView nextImage;
-		LinearLayout wrongLayout;
-		TextView explaindetailTv;
-		LinearLayout layoutA;
-		LinearLayout layoutB;
-		LinearLayout layoutC;
-		LinearLayout layoutD;
-		LinearLayout layoutE;
-		ImageView ivA;
-		ImageView ivB;
-		ImageView ivC;
-		ImageView ivD;
-		ImageView ivE;
-		TextView tvA;
-		TextView tvB;
-		TextView tvC;
-		TextView tvD;
-		TextView tvE;
-		ImageView ivA_;
-		ImageView ivB_;
-		ImageView ivC_;
-		ImageView ivD_;
-		ImageView ivE_;
-	}
-	
+        final int eT = ContextUtils.mPapers.get(position).getExerciseType();
+        if (eT == 1) {
+            holder.question.setText("(单选题)" + ContextUtils.mPapers.get(position).getQuestion());
+        } else if (eT == 2) {
+            holder.question.setText("(多选题)" + ContextUtils.mPapers.get(position).getQuestion());
+        } else if (eT == 3) {
+            holder.question.setText("(判断题)" + ContextUtils.mPapers.get(position).getQuestion());
+        }
+        holder.layoutA.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbA.isChecked();
+                holder.cbA.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutB.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbB.isChecked();
+                holder.cbB.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutC.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbC.isChecked();
+                holder.cbC.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutD.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbD.isChecked();
+                holder.cbD.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutE.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbE.isChecked();
+                holder.cbE.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutF.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbF.isChecked();
+                holder.cbF.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutG.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbG.isChecked();
+                holder.cbG.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutH.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbH.isChecked();
+                holder.cbH.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutI.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbI.isChecked();
+                holder.cbI.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbJ.setChecked(!cbState);
+                }
+            }
+        });
+        holder.layoutJ.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                boolean cbState = !holder.cbJ.isChecked();
+                holder.cbJ.setChecked(cbState);
+                if (cbState && (eT == 1) || eT == 3) {
+                    holder.cbA.setChecked(!cbState);
+                    holder.cbB.setChecked(!cbState);
+                    holder.cbC.setChecked(!cbState);
+                    holder.cbD.setChecked(!cbState);
+                    holder.cbE.setChecked(!cbState);
+                    holder.cbF.setChecked(!cbState);
+                    holder.cbG.setChecked(!cbState);
+                    holder.cbH.setChecked(!cbState);
+                    holder.cbI.setChecked(!cbState);
+                }
+            }
+        });
+        ForegroundColorSpan blueSpan = new ForegroundColorSpan(Color.parseColor("#2b89e9"));
+        SpannableStringBuilder builder1 = new SpannableStringBuilder(holder.question.getText().toString());
+        builder1.setSpan(blueSpan, 0, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        holder.question.setText(builder1);
+
+        if (position == viewItems.size() - 1) {
+            holder.nextText.setText("提交");
+            holder.nextImage.setImageResource(R.drawable.vote_submit_finish);
+        }
+        holder.previousBtn.setOnClickListener(new LinearOnClickListener(position - 1, position, holder));
+        holder.nextBtn.setOnClickListener(new LinearOnClickListener(position + 1, position, holder));
+        holder.totalBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Save(holder, position);
+                View popupView = mContext.getLayoutInflater().inflate(R.layout.popupwindow, null);
+                PopupWindow window = new PopupWindow(popupView, RelativeLayout.LayoutParams.MATCH_PARENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+                MyGridView gridView = (MyGridView) popupView.findViewById(R.id.item_grid_view_paper);
+                gridView.setAdapter(new MyAdapter(mContext, ContextUtils.mPapers, window));
+                //window.setAnimationStyle(R.style.popup_window_anim);
+                window.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFFFFF")));
+                window.setFocusable(true);
+                window.setOutsideTouchable(true);
+                window.update();
+                window.showAtLocation(mContext.getLayoutInflater().inflate(R.layout.activity_exam, null), Gravity
+                        .BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 144);
+            }
+        });
+
+        container.addView(viewItems.get(position));
+        return viewItems.get(position);
+    }
+
+    private void Save(ViewHolder viewHolder, int position) {
+        String result = "";
+        if (viewHolder.cbA.isChecked()) {
+            result += "A";
+        }
+        if (viewHolder.cbB.isChecked()) {
+            result += "B";
+        }
+        if (viewHolder.cbC.isChecked()) {
+            result += "C";
+        }
+        if (viewHolder.cbD.isChecked()) {
+            result += "D";
+        }
+        if (viewHolder.cbE.isChecked()) {
+            result += "E";
+        }
+        if (viewHolder.cbF.isChecked()) {
+            result += "F";
+        }
+        if (viewHolder.cbG.isChecked()) {
+            result += "G";
+        }
+        if (viewHolder.cbH.isChecked()) {
+            result += "H";
+        }
+        if (viewHolder.cbI.isChecked()) {
+            result += "I";
+        }
+        if (viewHolder.cbJ.isChecked()) {
+            result += "J";
+        }
+        ContextUtils.mPapers.get(position).setUserAnswer(result);
+    }
+
+    private void SaveAndUpload() {
+        List<UserAnswer> list = new ArrayList<>();
+        DbManager db = new DbManager(mContext);
+        db.openDB();
+        db.deleteLibraryAllData(ContextUtils.testId);
+        for (int i = 0; i < ContextUtils.mPapers.size(); i++) {
+            Paper paper = ContextUtils.mPapers.get(i);
+            //写本地数据库
+            db.insertLibrary(paper);
+            //生成答案列表
+            UserAnswer userAnswer = new UserAnswer();
+            userAnswer.answer = paper.getUserAnswer();
+            userAnswer.isright = paper.getAnswer().equals(paper.getUserAnswer()) ? 1 : 0;
+            userAnswer.score = paper.getScroe();
+            userAnswer.seq = paper.getSeq();
+            userAnswer.testid = ContextUtils.testId;
+            userAnswer.timuid = paper.getId();
+            list.add(userAnswer);
+        }
+        ContextUtils.mUserAnswers = list;
+        db.closeDB();
+        if (ContextUtils.mUserAnswers != null && ContextUtils.mUserAnswers.size() > 0) {
+            new UploadDataThread().start();
+        }
+    }
+
+    class LinearOnClickListener implements OnClickListener {
+        private int mPosition;
+        private int mPosition1;
+        private ViewHolder viewHolder;
+
+        public LinearOnClickListener(int position, int position1, ViewHolder viewHolder) {
+            mPosition = position;
+            mPosition1 = position1;
+            this.viewHolder = viewHolder;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Save(viewHolder, mPosition1);
+            if (mPosition == viewItems.size()) {
+                SaveAndUpload();
+            } else {
+                if (mPosition == -1) {
+                    Toast.makeText(mContext, "已经是第一题", Toast.LENGTH_SHORT).show();
+                } else {
+                    mContext.setCurrentView(mPosition);
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getCount() {
+        if (viewItems == null)
+            return 0;
+        return viewItems.size();
+    }
+
+    @Override
+    public boolean isViewFromObject(View arg0, Object arg1) {
+        return arg0 == arg1;
+    }
+
+    public class ViewHolder {
+        TextView questionType;
+        TextView question;
+        LinearLayout previousBtn, nextBtn, totalBtn;
+        TextView nextText;
+        TextView totalText;
+        ImageView nextImage;
+        LinearLayout layoutA;
+        LinearLayout layoutB;
+        LinearLayout layoutC;
+        LinearLayout layoutD;
+        LinearLayout layoutE;
+        LinearLayout layoutF;
+        LinearLayout layoutG;
+        LinearLayout layoutH;
+        LinearLayout layoutI;
+        LinearLayout layoutJ;
+        CheckBox cbA;
+        CheckBox cbB;
+        CheckBox cbC;
+        CheckBox cbD;
+        CheckBox cbE;
+        CheckBox cbF;
+        CheckBox cbG;
+        CheckBox cbH;
+        CheckBox cbI;
+        CheckBox cbJ;
+        TextView tvA;
+        TextView tvB;
+        TextView tvC;
+        TextView tvD;
+        TextView tvE;
+        TextView tvF;
+        TextView tvG;
+        TextView tvH;
+        TextView tvI;
+        TextView tvJ;
+    }
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1:
+                    Toast.makeText(mContext, "交卷成功", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(mContext, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);//设置不要刷新将要跳转的界面
+                    mContext.startActivity(intent);
+                    break;
+            }
+        }
+    };
+
+    class MyAdapter extends BaseAdapter {
+        private List<Paper> data;
+        private LayoutInflater layoutInflater;
+        private PopupWindow mView;
+
+        public MyAdapter(Context context, List<Paper> papers, PopupWindow view) {
+            layoutInflater = LayoutInflater.from(context);
+            data = papers;
+            mView = view;
+        }
+
+        @Override
+        public int getCount() {
+            return data.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return data.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            View v = layoutInflater.inflate(R.layout.item_grid_view_paper, null);
+            Button button = (Button) v.findViewById(R.id.no_tm_button);
+            button.setText(String.valueOf(position + 1));
+            Paper paper = data.get(position);
+            if (paper.getUserAnswer().isEmpty()) {
+                button.setBackgroundColor(ContextCompat.getColor(mContext,R.color.colorWhite));
+            }else{
+                button.setBackgroundColor(ContextCompat.getColor(mContext,R.color.status_timu_1));
+            }
+            button.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mView.dismiss();
+                    mContext.setCurrentView(position);
+                }
+            });
+            return v;
+        }
+
+    }
+
+    class UploadDataThread extends Thread {
+        @Override
+        public void run() {
+            try {
+                if (ContextUtils.isLogin) {
+                    ExamModel.UploadPaper(mContext);
+                    new JJUdpUtils().start();
+                }
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            handler.sendEmptyMessage(1);//通过handler发送一个更新数据的标记
+        }
+    }
+
+    class JJUdpUtils extends Thread {
+        @Override
+        public void run() {
+            try {
+                InetAddress address = InetAddress.getByName(ConstantUtils.UDP_SERVER_URL);
+                JSONObject object = new JSONObject();
+                object.put("type", 3);
+                object.put("code", 2);
+                object.put("usertype", 3);
+                object.put("testcode",mExam.getId());
+                object.put("userid", userInfo.get("userid"));
+                object.put("name", userInfo.get("name"));
+                byte[] data = object.toString().getBytes();
+                DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
+                DatagramSocket socket = new DatagramSocket();
+                socket.send(packet);
+            } catch (SocketException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

@@ -4,6 +4,7 @@ package com.shaohong.thesethree.modules.course;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,9 +16,20 @@ import android.view.ViewGroup;
 
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.Course;
+import com.shaohong.thesethree.bean.Edu;
+import com.shaohong.thesethree.bean.Exam;
+import com.shaohong.thesethree.bean.HistoryListItemObject;
+import com.shaohong.thesethree.database.DbManager;
+import com.shaohong.thesethree.model.CourseModel;
+import com.shaohong.thesethree.model.ExamModel;
+import com.shaohong.thesethree.model.HomeModel;
 import com.shaohong.thesethree.modules.course.adapter.CourseRecyclerViewAdapter;
 import com.shaohong.thesethree.utils.ConstantUtils;
+import com.shaohong.thesethree.utils.ContextUtils;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,9 +46,7 @@ public class CourseInfoFragment extends Fragment {
     RecyclerView recyclerView;
 
     public int courseType = 1;
-    boolean isLoading;
-    private Handler handler = new Handler();
-    private List<Course> data = new ArrayList<>();
+    private List<Edu> data = new ArrayList<>();
     private CourseRecyclerViewAdapter adapter = new CourseRecyclerViewAdapter(data);
 
     @Nullable
@@ -45,7 +55,8 @@ public class CourseInfoFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_course_info, container, false);
         ButterKnife.bind(this, view);
         initView();
-        initData();
+        swipeRefreshLayout.setRefreshing(true);
+        new LoadDataThread();
         return view;
     }
 
@@ -61,13 +72,7 @@ public class CourseInfoFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        data.clear();
-                        getData();
-                    }
-                }, 2000);
+                new LoadDataThread().start();
             }
         });
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -78,28 +83,10 @@ public class CourseInfoFragment extends Fragment {
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
             }
-
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
-                if (lastVisibleItemPosition + 1 == adapter.getItemCount()) {
-                    boolean isRefreshing = swipeRefreshLayout.isRefreshing();
-                    if (isRefreshing) {
-                        adapter.notifyItemRemoved(adapter.getItemCount());
-                        return;
-                    }
-                    if (!isLoading) {
-                        isLoading = true;
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                getData();
-                                isLoading = false;
-                            }
-                        }, 1000);
-                    }
-                }
+
             }
         });
 
@@ -107,10 +94,10 @@ public class CourseInfoFragment extends Fragment {
         adapter.setOnItemClickListener(new CourseRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Course course = data.get(position);
-                Intent intent = new Intent(getActivity(), CourseActivity.class);
-                intent.putExtra(ConstantUtils.COURSE_INFO, course);
-                startActivity(intent);
+//                Edu course = data.get(position);
+//                Intent intent = new Intent(getActivity(), CourseActivity.class);
+//                intent.putExtra(ConstantUtils.COURSE_INFO, course);
+//                startActivity(intent);
             }
 
             @Override
@@ -120,42 +107,43 @@ public class CourseInfoFragment extends Fragment {
         });
     }
 
-    public void initData() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getData();
-            }
-        }, 1500);
-    }
 
-    private void getData() {
-        String tag = "";
-        switch (courseType) {
-            case 0:
-                tag = "院内培训";
-                break;
-            case 1:
-                tag = "院外培训";
-                break;
-            case 2:
-                tag = "我参加的";
-                break;
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 1:
+                    if (swipeRefreshLayout.isRefreshing()){
+                        adapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);
+                        adapter.notifyItemRemoved(adapter.getItemCount());
+                        swipeRefreshLayout.setRefreshing(false);//设置不刷新
+                    }
+                    break;
+            }
         }
-        int size = data.size();
-        for (int i = 0; i < size + 1; i++) {
-            Course course = new Course();
-            course.setName(tag + "-三基考试" + i);
-            course.setPublishDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date().getTime()));
-            course.setAddress("第" + i + "会议室");
-            course.setStatus("已报名");
-            course.setPublisher("护理部");
-            course.setCent("100分");
-            course.setDate("2017-05-19~2017-05-29");
-            data.add(course);
+    };
+    class LoadDataThread extends Thread{
+        @Override
+        public void run() {
+            try {
+                if (ContextUtils.isLogin) {
+                    data.clear();
+                    List<Edu> edus = CourseModel.getEdus(getContext(),courseType);
+                    if(edus!=null&&edus.size()>0){
+                        data.addAll(edus);
+                    }
+                }
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            handler.sendEmptyMessage(1);
         }
-        adapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);
-        adapter.notifyItemRemoved(adapter.getItemCount());
     }
 }

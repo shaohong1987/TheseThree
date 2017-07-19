@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/type_notice_detail_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="考试通知"
+        android:textSize="@dimen/large_font_size"
+        android:layout_marginTop="@dimen/large_margin"
+        android:gravity="center_horizontal"/>
+
+    <View
+        android:layout_marginTop="@dimen/medium_margin"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/lightblue" />
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/medium_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="名称："
+            android:gravity="right"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="N0护士三基考试"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/medium_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="时间："
+            android:gravity="right"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="2017-10-10 15:30"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/medium_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="地点："
+            android:gravity="right"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="综合会议室"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/medium_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="人员："
+            android:gravity="right"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="全院所有N0护士"/>
+
+</LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="@dimen/medium_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="状态："
+            android:gravity="right"/>
+        <TextView
+            android:id="@+id/status_notice_detail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="未确认"/>
+</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/show_notice_detail"
+        android:layout_marginTop="@dimen/large_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/confirm_notice_detail"
+            android:layout_margin="@dimen/small_margin"
+            style="@style/button_circle_corner"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="确认参加"
+            android:textColor="@color/colorBlue"
+            />
+
+        <Button
+            android:id="@+id/refuse_notice_detail"
+            android:layout_margin="@dimen/small_margin"
+            style="@style/button_circle_corner"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlue"
+            android:text="拒绝参加"/>
+    </LinearLayout>
+</LinearLayout>

@@ -5,16 +5,20 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
+import com.shaohong.thesethree.modules.exam.ExamActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,8 +31,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
@@ -74,7 +80,7 @@ public class UpdateManager {
     private boolean isUpdate(){
         int versionCode = getVerCode();
         if(null != hashMap) {
-            int serviceCode = Integer.valueOf(hashMap.get("version"));
+            int serviceCode = Integer.valueOf(hashMap.get(ConstantUtils.APK_VERSION));
             //版本判断
             if(serviceCode > versionCode) {
                 return true;
@@ -92,7 +98,7 @@ public class UpdateManager {
         public void run() {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
-                    .url(ConstantUtils.UPDATE_URL)
+                    .url(ConstantUtils.REQUEST_URL+"getVersion")
                     .build();
             Response response;
             try {
@@ -103,8 +109,8 @@ public class UpdateManager {
                         JSONObject obj=new JSONObject(result);
                         hashMap=new HashMap<>();
                         hashMap.put(ConstantUtils.APK_VERSION,obj.getString(ConstantUtils.APK_VERSION));
-                        hashMap.put(ConstantUtils.APK_NAME,obj.getString(ConstantUtils.APK_NAME));
-                        hashMap.put(ConstantUtils.APK_URL,obj.getString(ConstantUtils.APK_URL));
+                        hashMap.put(ConstantUtils.APK_NAME,"thesethree");
+                        hashMap.put(ConstantUtils.APK_URL,"http://www.js00000000.com/Content/File/thesethree.apk");
                         handler.sendEmptyMessage(CHECKED);
                     }
                 } else {
@@ -178,6 +184,7 @@ public class UpdateManager {
         try {
             verCode = context.getPackageManager().getPackageInfo(
                     ConstantUtils.PACKAGE_NAME, 0).versionCode;
+
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, e.getMessage());
         }

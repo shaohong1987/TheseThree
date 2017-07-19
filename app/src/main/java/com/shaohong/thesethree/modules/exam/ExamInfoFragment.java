@@ -4,6 +4,7 @@ package com.shaohong.thesethree.modules.exam;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,13 +16,12 @@ import android.view.ViewGroup;
 
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.Exam;
+import com.shaohong.thesethree.model.ExamModel;
 import com.shaohong.thesethree.modules.exam.adapter.ExamRecyclerViewAdapter;
 import com.shaohong.thesethree.utils.ConstantUtils;
 import com.shaohong.thesethree.utils.ContextUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -36,42 +36,43 @@ public class ExamInfoFragment extends Fragment {
     SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.recyclerView_exam)
     RecyclerView recyclerView;
+    public int examType = 1;
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 1:
+                    if (swipeRefreshLayout.isRefreshing()){
+                        adapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);//设置不刷新
+                    }
+                    break;
+            }
+        }
+    };
 
-    public int examType=1;
-    boolean isLoading;
-    private Handler handler = new Handler();
     private List<Exam> data = new ArrayList<>();
     private ExamRecyclerViewAdapter adapter = new ExamRecyclerViewAdapter(data);
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view=inflater.inflate(R.layout.fragment_exam_info,container,false);
-        ButterKnife.bind(this,view);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle
+            savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_exam_info, container, false);
+        ButterKnife.bind(this, view);
         initView();
-        initData();
+        swipeRefreshLayout.setRefreshing(true);
+        new LoadDataThread().start();
         return view;
     }
 
     public void initView() {
         swipeRefreshLayout.setColorSchemeResources(R.color.colorBlue);
-        swipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                swipeRefreshLayout.setRefreshing(true);
-            }
-        });
-
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        data.clear();
-                        getData();
-                    }
-                }, 2000);
+                new LoadDataThread().start();
             }
         });
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -86,24 +87,7 @@ public class ExamInfoFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
-                if (lastVisibleItemPosition + 1 == adapter.getItemCount()) {
-                    boolean isRefreshing = swipeRefreshLayout.isRefreshing();
-                    if (isRefreshing) {
-                        adapter.notifyItemRemoved(adapter.getItemCount());
-                        return;
-                    }
-                    if (!isLoading) {
-                        isLoading = true;
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                getData();
-                                isLoading = false;
-                            }
-                        }, 1000);
-                    }
-                }
+
             }
         });
 
@@ -111,9 +95,9 @@ public class ExamInfoFragment extends Fragment {
         adapter.setOnItemClickListener(new ExamRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Exam exam=data.get(position);
-                Intent intent=new Intent(ContextUtils.getInstance(), ExamInfoActivity.class);
-                intent.putExtra(ConstantUtils.EXAM_INFO,exam);
+                Exam exam = data.get(position);
+                Intent intent = new Intent(ContextUtils.getInstance(), ExamInfoActivity.class);
+                intent.putExtra(ConstantUtils.EXAM_INFO, exam);
                 startActivity(intent);
             }
 
@@ -124,39 +108,22 @@ public class ExamInfoFragment extends Fragment {
         });
     }
 
-    public void initData(){
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getData();
+    class LoadDataThread extends Thread{
+        @Override
+        public void run() {
+            try {
+                if(ContextUtils.isLogin){
+                    data.clear();
+                    List<Exam> exams = ExamModel.GetExamList(getContext(), examType);
+                    if(exams!=null&&exams.size()>0){
+                        data.addAll(exams);
+                    }
+                }
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        }, 1500);
-    }
-
-    private void getData() {
-        String tag="";
-        switch (examType){
-            case 0:
-                tag="全院考试";
-                break;
-            case 1:
-                tag="科室考试";
-                break;
-            case 2:
-                tag="专科考试";
-                break;
+            handler.sendEmptyMessage(1);//通过handler发送一个更新数据的标记
         }
-        int size=data.size();
-        for (int i=0;i<size+1;i++){
-            Exam exam=new Exam();
-            exam.setName(tag+"-三基考试"+i);
-            exam.setDatetime(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date().getTime()));
-            exam.setAddress("第"+i+"会议室");
-            exam.setStatus(i%3);
-            data.add(exam);
-        }
-        adapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);
-        adapter.notifyItemRemoved(adapter.getItemCount());
     }
 }

@@ -8,6 +8,7 @@ import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.base.BaseActivity;
+import com.shaohong.thesethree.database.DBHelper;
 import com.shaohong.thesethree.modules.course.CourseFragment;
 import com.shaohong.thesethree.modules.exam.ExamFragment;
 import com.shaohong.thesethree.modules.home.HomeFragment;
@@ -33,7 +34,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         ButterKnife.bind(this);
         fragmentManager = getSupportFragmentManager();
 
@@ -41,8 +41,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         initNavigation();
 
         //检查更新
-        //UpdateManager updateManager=new UpdateManager(MainActivity.this);
-        //updateManager.update();
+        UpdateManager updateManager=new UpdateManager(MainActivity.this);
+        updateManager.update();
     }
 
     private void initView() {

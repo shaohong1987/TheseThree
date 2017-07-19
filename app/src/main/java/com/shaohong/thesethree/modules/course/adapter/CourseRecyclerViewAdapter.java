@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.Course;
+import com.shaohong.thesethree.bean.Edu;
 import com.shaohong.thesethree.utils.ContextUtils;
 
 import org.w3c.dom.Text;
@@ -23,7 +24,6 @@ import java.util.List;
 public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_ITEM = 0;
-    private static final int TYPE_FOOTER = 1;
     private Context context;
     private List data;
 
@@ -52,39 +52,28 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView
 
     @Override
     public int getItemViewType(int position) {
-        if (position + 1 == getItemCount()) {
-            return TYPE_FOOTER;
-        } else {
-            return TYPE_ITEM;
-        }
+        return TYPE_ITEM;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == TYPE_ITEM) {
-            View view = LayoutInflater.from(context).inflate(R.layout.item_recycler_view_course, parent,
-                    false);
-            return new ItemViewHolder(view);
-        } else if (viewType == TYPE_FOOTER) {
-            View view = LayoutInflater.from(context).inflate(R.layout.progress_bar_recycler_view, parent,
-                    false);
-            return new FootViewHolder(view);
-        }
-        return null;
+        View view = LayoutInflater.from(context).inflate(R.layout.item_recycler_view_course, parent,
+                false);
+        return new ItemViewHolder(view);
     }
 
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemViewHolder) {
-            Course course = (Course) data.get(position);
-            ((ItemViewHolder) holder).nameTextView.setText(course.getName());
-            ((ItemViewHolder) holder).dateTextView.setText(course.getDate());
-            ((ItemViewHolder) holder).addressTextView.setText(course.getAddress());
-            ((ItemViewHolder) holder).statusTextView.setText(course.getStatus());
-            ((ItemViewHolder) holder).centTextView.setText(course.getCent());
-            ((ItemViewHolder) holder).publisherTextView.setText(course.getPublisher());
-            ((ItemViewHolder) holder).publishDateTextView.setText(course.getPublishDate());
+            Edu course = (Edu) data.get(position);
+            ((ItemViewHolder) holder).nameTextView.setText(course.content);
+            ((ItemViewHolder) holder).dateTextView.setText(course.sendtime);
+//            ((ItemViewHolder) holder).addressTextView.setText(course.getAddress());
+//            ((ItemViewHolder) holder).statusTextView.setText(course.getStatus());
+//            ((ItemViewHolder) holder).centTextView.setText(course.getCent());
+//            ((ItemViewHolder) holder).publisherTextView.setText(course.getPublisher());
+//            ((ItemViewHolder) holder).publishDateTextView.setText(course.getPublishDate());
             if (onItemClickListener != null) {
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -124,12 +113,6 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView
             centTextView = (TextView) view.findViewById(R.id.cent_course);
             publisherTextView = (TextView) view.findViewById(R.id.publisher_course);
             publishDateTextView = (TextView) view.findViewById(R.id.publish_date_course);
-        }
-    }
-
-    static class FootViewHolder extends RecyclerView.ViewHolder {
-        public FootViewHolder(View view) {
-            super(view);
         }
     }
 }

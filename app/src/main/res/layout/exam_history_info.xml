@@ -12,8 +12,8 @@
             android:text="@string/title_1_exam" />
         <TextView
             style="@style/record_exam_content_text_view"
-            android:id="@+id/xue_fen_exam"
-            android:text="0"/>
+            android:id="@+id/xf_exam"
+            android:text="-"/>
     </LinearLayout>
 
     <View style="@style/record_exam_view"/>
@@ -24,8 +24,8 @@
             android:text="@string/title_2_exam" />
         <TextView
             style="@style/record_exam_content_text_view"
-            android:id="@+id/correct_rate_exam"
-            android:text="100%"/>
+            android:id="@+id/cc_exam"
+            android:text="-"/>
     </LinearLayout>
 
     <View style="@style/record_exam_view"/>
@@ -36,7 +36,7 @@
             android:text="@string/title_3_exam" />
         <TextView
             style="@style/record_exam_content_text_view"
-            android:id="@+id/do_times_exam"
-            android:text="0"/>
+            android:id="@+id/zql_exam"
+            android:text="-"/>
     </LinearLayout>
 </LinearLayout>

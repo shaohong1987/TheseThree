@@ -35,24 +35,21 @@
         android:textStyle="bold"/>
 
     <TextView
+        android:id="@+id/name_exam_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="名称：全院护士三基考试"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
+        android:id="@+id/time_exam_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="时间：2017-05-12 17:30"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="时长：2 小时"
-        android:textSize="@dimen/medium_font_size"/>
-
-    <TextView
+        android:id="@+id/address_exam_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="地点：12号楼3层大会议室"
@@ -72,18 +69,21 @@
         android:textStyle="bold"/>
 
     <TextView
+        android:id="@+id/name_user_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="姓名：张三李四王二麻"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
+        android:id="@+id/loginId_user_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="工号：1029384756"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
+        android:id="@+id/deptname_user_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="科室：360°美容整形科"
@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/small_margin"
         android:layout_marginTop="@dimen/large_margin"
-        android:text="开始答题"
+        android:text="扫码签到"
         android:textColor="@color/colorBlue"
         android:textSize="@dimen/medium_font_size"/>
 

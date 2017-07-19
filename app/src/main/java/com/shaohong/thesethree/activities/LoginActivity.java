@@ -170,9 +170,8 @@ public class LoginActivity extends BaseActivity {
         protected Boolean doInBackground(Void... params) {
             boolean result=false;
             try {
-                result=new UserModel().login(mUserName,mPassword);
-                //在此实现后台登录方法
-                Thread.sleep(1000);
+                result=UserModel.login(getApplicationContext(),mUserName,mPassword);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 System.out.print(e.getMessage());
             } catch (JSONException e) {
@@ -187,7 +186,6 @@ public class LoginActivity extends BaseActivity {
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
-
             if (success) {
                 setResult(RESULT_OK);
                 finish();

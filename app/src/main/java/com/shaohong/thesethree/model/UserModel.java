@@ -1,15 +1,16 @@
 package com.shaohong.thesethree.model;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.shaohong.thesethree.utils.ConstantUtils;
 import com.shaohong.thesethree.utils.ContextUtils;
+import com.shaohong.thesethree.utils.SharedPreferencesHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -18,27 +19,34 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Created by shaohong on 2017/5/10.
+ * Created by shaohong on 2017/5/m10.
  */
 
 public class UserModel {
-    public boolean isLogin() {
-        Context context = ContextUtils.getInstance();
-        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        int uid = sp.getInt("id", -1);
-        String un = sp.getString("userName", "");
-        String pw = sp.getString("password", "");
-        if (uid > 0 && !un.isEmpty() && !pw.isEmpty()) {
-            //需要在此实现记录用户的登录信息
-            return true;
-        }
-        return false;
+    public static String getUserInfo(Context context) {
+        SharedPreferencesHelper sharedPreferencesHelper=new SharedPreferencesHelper(context);
+        String name = (String) sharedPreferencesHelper.get("name", "");
+        String loginID = (String)sharedPreferencesHelper.get("loginID", "");
+        String deptName = (String)sharedPreferencesHelper.get("deptname", "");
+        return name+" "+loginID+" "+deptName;
+    }
+
+    public static HashMap<String,String> getUserInfoMore(Context context){
+        HashMap<String,String> result=new HashMap<>();
+        SharedPreferencesHelper sharedPreferencesHelper=new SharedPreferencesHelper(context);
+        String name = (String) sharedPreferencesHelper.get("name", "");
+        result.put("name",name);
+        String loginID = (String)sharedPreferencesHelper.get("loginID", "");
+        result.put("loginID",loginID);
+        String deptName = (String)sharedPreferencesHelper.get("deptname", "");
+        result.put("deptname",deptName);
+        return result;
     }
 
     /*
     * 登陆操作
     * */
-    public boolean login(String userName,String password) throws IOException, JSONException {
+    public static boolean login(Context context,String userName,String password) throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient();
         RequestBody formBody = new FormBody.Builder()
                 .add("phone", userName)
@@ -56,40 +64,38 @@ public class UserModel {
                 JSONObject obj=new JSONObject(result);
                 if(obj.getString("result").equals("true"))
                 {
-                    Context context = ContextUtils.getInstance();
-                    SharedPreferences sp = context.getApplicationContext().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sp.edit();
-                    editor.putString("phone", userName);
-                    editor.putString("password", password);
-                    editor.putString("name", obj.getString("name"));
-                    editor.putInt("id", 1);
-                    editor.commit();
+                    SharedPreferencesHelper sharedPreferencesHelper=new SharedPreferencesHelper(context);
+                    sharedPreferencesHelper.put("userid", obj.getInt("userid"));
+                    sharedPreferencesHelper.put("loginID", obj.getString("loginid"));
+                    sharedPreferencesHelper.put("name", obj.getString("name"));
+                    sharedPreferencesHelper.put("phone", userName);
+                    sharedPreferencesHelper.put("password", password);
+                    sharedPreferencesHelper.put("gwname", obj.getString("gwname"));
+                    sharedPreferencesHelper.put("zcname", obj.getString("zhichen"));
+                    sharedPreferencesHelper.put("hospitalname", obj.getString("hospital"));
+                    sharedPreferencesHelper.put("hospitalcode", obj.getString("hospitalcode"));
+                    sharedPreferencesHelper.put("wardcode", obj.getString("wardcode"));
+                    sharedPreferencesHelper.put("wardname", obj.getString("wardname"));
+                    sharedPreferencesHelper.put("deptcode", obj.getString("deptcode"));
+                    sharedPreferencesHelper.put("deptname", obj.getString("deptname"));
+                    sharedPreferencesHelper.put("type", obj.getInt("type"));
+                    ContextUtils.isLogin=true;
                     return true;
                 }
             }
         } else {
             throw new IOException("Unexpected code " + response);
         }
-//        Context context = ContextUtils.getInstance();
-//        SharedPreferences sp = context.getApplicationContext().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = sp.edit();
-//        editor.putString("userName", userName);
-//        editor.putString("password", password);
-//        editor.putInt("id", 1);
-//        editor.commit();
-          return false;
+        return false;
     }
 
     /*
     * 登出操作
     * */
-    public boolean loginOut() {
+    public boolean loginOut(Context context) {
         try {
-            Context context = ContextUtils.getInstance();
-            SharedPreferences sp = context.getApplicationContext().getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sp.edit();
-            editor.clear();
-            editor.commit();
+            new SharedPreferencesHelper(context).clear();
+            ContextUtils.isLogin=false;
         } catch (Exception e) {
             return false;
         }

@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by shaohong on 2017/5/11.
+ * Created by shaohong on 2017/5/m11.
  */
 
 public class BarCodeUtils {

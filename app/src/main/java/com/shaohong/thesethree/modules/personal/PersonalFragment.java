@@ -7,15 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.activities.CommonActivity;
 import com.shaohong.thesethree.activities.LoginActivity;
 import com.shaohong.thesethree.base.BaseFragment;
-import com.shaohong.thesethree.bean.CommonData;
 import com.shaohong.thesethree.model.UserModel;
 import com.shaohong.thesethree.utils.ConstantUtils;
+import com.shaohong.thesethree.utils.ContextUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,18 +69,20 @@ public class PersonalFragment extends BaseFragment implements View.OnClickListen
     }
 
     private void isLogin() {
-        UserModel userModel = new UserModel();
-        if (userModel.isLogin()) {
+
+        if (ContextUtils.isLogin) {
             login_out_button.setVisibility(View.VISIBLE);
             login_in_button.setVisibility(View.GONE);
             personal_info_menu_layout.setVisibility(View.VISIBLE);
             user_info_text_view.setVisibility(View.VISIBLE);
+            user_info_text_view.setText(UserModel.getUserInfo(getContext()));
             profile_image.setImageResource(R.drawable.user_image);
         } else {
             login_out_button.setVisibility(View.GONE);
             login_in_button.setVisibility(View.VISIBLE);
             personal_info_menu_layout.setVisibility(View.GONE);
             user_info_text_view.setVisibility(View.GONE);
+            user_info_text_view.setText("");
             profile_image.setImageResource(R.drawable.ic_account_circle_black_24dp);
         }
     }
@@ -101,7 +102,7 @@ public class PersonalFragment extends BaseFragment implements View.OnClickListen
                 break;
             case R.id.login_out_button:
                 UserModel userModel = new UserModel();
-                userModel.loginOut();
+                userModel.loginOut(getContext());
                 isLogin();
                 break;
             case R.id.personal_info_layout:
