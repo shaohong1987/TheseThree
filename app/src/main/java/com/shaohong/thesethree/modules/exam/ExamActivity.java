@@ -2,6 +2,8 @@ package com.shaohong.thesethree.modules.exam;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnKeyListener;
 import android.content.Intent;
@@ -41,6 +43,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,10 +64,12 @@ public class ExamActivity extends Activity {
     Exam mExam;
     Timer timer;
     TimerTask timerTask;
-    int minute = 5;
+    int minute = 0;
     int second = 0;
     int isFirst;
     private HashMap<String, String> userInfo;
+    private boolean flag=true;
+
     Handler handlerTime = new Handler() {
         public void handleMessage(Message msg) {
             if (minute < 2) {
@@ -129,6 +136,31 @@ public class ExamActivity extends Activity {
         setContentView(R.layout.activity_exam);
         Bundle bundle=getIntent().getExtras();
         mExam= (Exam) bundle.get(ConstantUtils.EXAM_INFO);
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            if(mExam.getType()==1){
+                //正计时
+                new Thread(new MyThread()).start();
+            }else if(mExam.getType()==0){
+                //倒计时
+                Date d1 = df.parse(mExam.getEndTime());
+                Date d2 = new Date();
+                long diff = d1.getTime() - d2.getTime();
+                if(diff<=0){
+                    Toast.makeText(getApplicationContext(),"该考试已结束",Toast.LENGTH_LONG).show();
+                    finish();
+                }
+                long days = diff / (1000 * 60 * 60 * 24);
+                long hours = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60 * 60);
+                long min = (diff-days*(1000 * 60 * 60 * 24)-hours*(1000* 60 * 60))/(1000* 60);
+                long sec=(diff-days*(1000 * 60 * 60 * 24)-hours*(1000* 60 * 60)-min*(1000* 60))/(1000);
+                minute= (int) min;
+                second= (int) sec;
+                startTime();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         userInfo= UserModel.getUserInfoMore(getApplicationContext());
         initView();
         for (int i = 0; i < ContextUtils.mPapers.size(); i++) {
@@ -138,7 +170,7 @@ public class ExamActivity extends Activity {
         pagerAdapter = new ExaminationSubmitAdapter(ExamActivity.this,viewItems,mExam);
         viewPager.setAdapter(pagerAdapter);
         viewPager.getParent().requestDisallowInterceptTouchEvent(false);
-        startTime();
+
     }
 
     public void initView() {
@@ -146,12 +178,6 @@ public class ExamActivity extends Activity {
         titleTv = (TextView) findViewById(R.id.title);
         right = (TextView) findViewById(R.id.right);
         titleTv.setText("考试答题");
-        //Drawable drawable1 = getBaseContext().getResources().getDrawable(
-        //        R.drawable.ic_practice_time);
-        //drawable1.setBounds(0, 0, drawable1.getMinimumWidth(),
-        //        drawable1.getMinimumHeight());
-        //right.setCompoundDrawables(drawable1, null, null, null);
-        //right.setText("120:00");
         viewPager = (ExamViewPager) findViewById(R.id.vote_submit_viewpager);
         leftIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,6 +217,7 @@ public class ExamActivity extends Activity {
 
     // 提交试卷
     public void uploadExamination() {
+        flag=false;
         List<UserAnswer> list=new ArrayList<>();
         DbManager db=new DbManager(getApplicationContext());
         db.openDB();
@@ -261,6 +288,7 @@ public class ExamActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        flag=false;
     }
 
     @Override
@@ -315,9 +343,17 @@ public class ExamActivity extends Activity {
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                     break;
+                case 1011:
+                    second+=1;
+                    int hour=second/(60*60);
+                    int min=(second-hour*60*60)/60;
+                    int sec=(second-hour*60*60-min*60);
+                    right.setText(hour+"小时"+min+"分钟"+sec+"秒");
+                    break;
             }
         }
     };
+
     class UploadDataThread extends Thread{
         @Override
         public void run() {
@@ -355,6 +391,21 @@ public class ExamActivity extends Activity {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    class MyThread implements Runnable {      // thread
+        @Override
+        public void run() {
+            while (flag) {
+                try {
+                    Thread.sleep(1000);     // sleep 1000ms
+                    Message message = new Message();
+                    message.what = 1011;
+                    handler.sendMessage(message);
+                } catch (Exception e) {
+                }
             }
         }
     }

@@ -62,11 +62,11 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
     Exam mExam;
     private HashMap<String, String> userInfo;
 
-    public ExaminationSubmitAdapter(ExamActivity context, List<View> viewItems,Exam exam) {
+    public ExaminationSubmitAdapter(ExamActivity context, List<View> viewItems, Exam exam) {
         mContext = context;
         this.viewItems = viewItems;
-        userInfo= UserModel.getUserInfoMore(mContext);
-        mExam=exam;
+        userInfo = UserModel.getUserInfoMore(mContext);
+        mExam = exam;
     }
 
     public long getItemId(int position) {
@@ -90,6 +90,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         holder.nextText = (TextView) convertView.findViewById(R.id.menu_bottom_nextTV);
         holder.totalText = (TextView) convertView.findViewById(R.id.activity_prepare_test_totalTv);
         holder.nextImage = (ImageView) convertView.findViewById(R.id.menu_bottom_nextIV);
+        holder.questionBtn = (LinearLayout) convertView.findViewById(R.id.activity_question_test_totalLayout);
         holder.layoutA = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_a);
         holder.layoutB = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_b);
         holder.layoutC = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_layout_c);
@@ -386,12 +387,13 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
             holder.nextText.setText("提交");
             holder.nextImage.setImageResource(R.drawable.vote_submit_finish);
         }
-        holder.previousBtn.setOnClickListener(new LinearOnClickListener(position - 1, position, holder));
-        holder.nextBtn.setOnClickListener(new LinearOnClickListener(position + 1, position, holder));
+        holder.previousBtn.setOnClickListener(new LinearOnClickListener(position - 1, position, holder, 1));
+        holder.nextBtn.setOnClickListener(new LinearOnClickListener(position + 1, position, holder, 1));
+        holder.questionBtn.setOnClickListener(new LinearOnClickListener(position + 1, position, holder, 0));
         holder.totalBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Save(holder, position);
+                Save(holder, position, 1);
                 View popupView = mContext.getLayoutInflater().inflate(R.layout.popupwindow, null);
                 PopupWindow window = new PopupWindow(popupView, RelativeLayout.LayoutParams.MATCH_PARENT,
                         RelativeLayout.LayoutParams.WRAP_CONTENT, true);
@@ -403,7 +405,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
                 window.setOutsideTouchable(true);
                 window.update();
                 window.showAtLocation(mContext.getLayoutInflater().inflate(R.layout.activity_exam, null), Gravity
-                        .BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 144);
+                        .BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 144);
             }
         });
 
@@ -411,7 +413,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         return viewItems.get(position);
     }
 
-    private void Save(ViewHolder viewHolder, int position) {
+    private void Save(ViewHolder viewHolder, int position, int type) {
         String result = "";
         if (viewHolder.cbA.isChecked()) {
             result += "A";
@@ -443,6 +445,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         if (viewHolder.cbJ.isChecked()) {
             result += "J";
         }
+        ContextUtils.mPapers.get(position).setN(type);
         ContextUtils.mPapers.get(position).setUserAnswer(result);
     }
 
@@ -476,16 +479,18 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         private int mPosition;
         private int mPosition1;
         private ViewHolder viewHolder;
+        private int t;
 
-        public LinearOnClickListener(int position, int position1, ViewHolder viewHolder) {
+        public LinearOnClickListener(int position, int position1, ViewHolder viewHolder, int type) {
             mPosition = position;
             mPosition1 = position1;
             this.viewHolder = viewHolder;
+            t = type;
         }
 
         @Override
         public void onClick(View v) {
-            Save(viewHolder, mPosition1);
+            Save(viewHolder, mPosition1, t);
             if (mPosition == viewItems.size()) {
                 SaveAndUpload();
             } else {
@@ -513,7 +518,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
     public class ViewHolder {
         TextView questionType;
         TextView question;
-        LinearLayout previousBtn, nextBtn, totalBtn;
+        LinearLayout previousBtn, nextBtn, totalBtn, questionBtn;
         TextView nextText;
         TextView totalText;
         ImageView nextImage;
@@ -598,9 +603,15 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
             button.setText(String.valueOf(position + 1));
             Paper paper = data.get(position);
             if (paper.getUserAnswer().isEmpty()) {
-                button.setBackgroundColor(ContextCompat.getColor(mContext,R.color.colorWhite));
-            }else{
-                button.setBackgroundColor(ContextCompat.getColor(mContext,R.color.status_timu_1));
+                if (paper.getN() == (0)) {
+                    button.setBackgroundColor(ContextCompat.getColor(mContext, R.color.yellow));
+                } else
+                    button.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorWhite));
+            } else {
+                if (paper.getN() == (0)) {
+                    button.setBackgroundColor(ContextCompat.getColor(mContext, R.color.yellow));
+                } else
+                    button.setBackgroundColor(ContextCompat.getColor(mContext, R.color.status_timu_1));
             }
             button.setOnClickListener(new OnClickListener() {
                 @Override
@@ -639,7 +650,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
                 object.put("type", 3);
                 object.put("code", 2);
                 object.put("usertype", 3);
-                object.put("testcode",mExam.getId());
+                object.put("testcode", mExam.getId());
                 object.put("userid", userInfo.get("userid"));
                 object.put("name", userInfo.get("name"));
                 byte[] data = object.toString().getBytes();

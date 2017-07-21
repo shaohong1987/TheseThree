@@ -21,6 +21,25 @@
 
     <TextView
         android:layout_marginTop="@dimen/small_margin"
+        android:id="@+id/djs_jiankao_text_view"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorBlue"
+        android:text="00时00分00秒"/>
+
+    <Button
+        android:id="@+id/control_jiankao_button"
+        android:layout_margin="@dimen/small_margin"
+        style="@style/button_circle_corner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="开始考试"
+        android:textColor="@color/colorBlue"
+        />
+
+    <TextView
+        android:layout_marginTop="@dimen/small_margin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/micro_margin"
@@ -30,7 +49,24 @@
         android:textStyle="bold"
         android:textColor="@color/colorWhite"
         android:text="已签到,未交卷"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
+        <com.shaohong.thesethree.myview.MyGridView
+            android:id="@+id/yi_jiao_juan_grid_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/small_margin"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:verticalSpacing="@dimen/small_margin"
+            android:horizontalSpacing="@dimen/small_margin"
+            android:numColumns="4"
+            android:scrollbars="none"/>
+
+    </ScrollView>
     <TextView
         android:layout_marginTop="@dimen/medium_margin"
         android:layout_width="match_parent"
@@ -42,5 +78,22 @@
         android:textColor="@color/colorWhite"
         android:textStyle="bold"
         android:text="已交卷"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
+        <com.shaohong.thesethree.myview.MyGridView
+            android:id="@+id/wei_jiao_juan_grid_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/small_margin"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:verticalSpacing="@dimen/small_margin"
+            android:horizontalSpacing="@dimen/small_margin"
+            android:numColumns="4"
+            android:scrollbars="none"/>
+
+    </ScrollView>
 </LinearLayout>

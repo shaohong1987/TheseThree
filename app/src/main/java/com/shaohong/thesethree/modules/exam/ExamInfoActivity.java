@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.base.BaseActivity;
@@ -41,11 +42,7 @@ public class ExamInfoActivity extends BaseActivity {
                             showFragment(examEnterFragment);
                         }
                         else{
-                            new AlertDialog.Builder(getApplicationContext())
-                                    .setTitle("提示")
-                                    .setMessage("该考试已经结束")
-                                    .setPositiveButton("确定", null)
-                                    .show();
+                            Toast.makeText(getApplicationContext(),"该考试已结束",Toast.LENGTH_LONG).show();
                             finish();
                         }
                     }

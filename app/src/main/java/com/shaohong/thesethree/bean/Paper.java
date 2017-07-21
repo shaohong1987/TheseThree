@@ -40,6 +40,7 @@ public class Paper implements Parcelable {
         seq = in.readInt();
         isright = in.readInt();
         difficulty = in.readFloat();
+        n=in.readInt();
     }
 
     public static final Creator<Paper> CREATOR = new Creator<Paper>() {
@@ -97,6 +98,15 @@ public class Paper implements Parcelable {
     private int seq;
     private int isright;
     private float difficulty;
+    private int n;
+
+    public int getN() {
+        return n;
+    }
+
+    public void setN(int n) {
+        this.n = n;
+    }
 
     public int getId() {
         return id;
@@ -341,6 +351,7 @@ public class Paper implements Parcelable {
         dest.writeInt(seq);
         dest.writeInt(isright);
         dest.writeFloat(difficulty);
+        dest.writeInt(n);
     }
 }
 

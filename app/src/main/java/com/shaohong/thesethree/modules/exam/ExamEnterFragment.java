@@ -31,10 +31,12 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Timer;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -60,14 +62,30 @@ public class ExamEnterFragment extends Fragment {
         mExam = (Exam) bundle.get(ConstantUtils.EXAM_INFO);
         timer_text_view = (TextView) view.findViewById(R.id.timer_exam);
         sign_button = (Button) view.findViewById(R.id.enter_exam_button);
-
         sign_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String arg = ((Button) v).getText().toString();
                 String t = timer_text_view.getText().toString();
                 if (arg.equals("开始答题")) {
-                    new LoadDataThread().start();
+                    if(mExam.getType()==0){
+                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        try {
+                            Date d1 = df.parse(mExam.getStartTime());
+                            Date d2 = new Date();
+                            long diff = d1.getTime() - d2.getTime();
+                            if(diff>0){
+                                Toast.makeText(getContext(),"考试未开始",Toast.LENGTH_LONG).show();
+                            }else{
+                                new LoadDataThread().start();
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                    }else{
+                        //去判断考试状态，应该调用接口
+                    }
                 }
                 if (arg.equals("开始答题") && t.equals("考试开始")) {
                     Intent intent = new Intent(getActivity(), ExamActivity.class);
@@ -213,6 +231,9 @@ public class ExamEnterFragment extends Fragment {
                             .show();
                     sign_button.setText("下载试卷");
                     break;
+                case 10:
+                    //解析数据，如果是开始考试，或是其他
+                    break;
             }
         }
     };
@@ -267,6 +288,18 @@ public class ExamEnterFragment extends Fragment {
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
                 DatagramSocket socket = new DatagramSocket();
                 socket.send(packet);
+                packet.setData(new byte[1024]);
+                packet.setLength(1024);
+                while (true) {
+                    socket.receive(packet);
+                    String result = new String(packet.getData(), packet.getOffset(), packet.getLength());
+                    Message message = new Message();
+                    message.what = 10;
+                    Bundle bundle = new Bundle();
+                    bundle.putString("data", result);
+                    message.setData(bundle);
+                    handler.sendMessage(message);
+                }
             } catch (SocketException e) {
                 e.printStackTrace();
             } catch (IOException e) {
