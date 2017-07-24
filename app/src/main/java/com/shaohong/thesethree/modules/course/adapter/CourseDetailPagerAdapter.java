@@ -20,15 +20,9 @@ public class CourseDetailPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        //在这边实现不同的加载
-        if(position==0){
-            CourseDetailInfoFragment courseOptionFragment=new CourseDetailInfoFragment();
-            courseOptionFragment.courseId=courseId;
-            return courseOptionFragment;
-        }else if(position==1){
-            //在线讨论
-        }
-        return null;
+        CourseDetailInfoFragment courseOptionFragment=new CourseDetailInfoFragment();
+        courseOptionFragment.courseId=courseId;
+        return courseOptionFragment;
     }
 
     @Override

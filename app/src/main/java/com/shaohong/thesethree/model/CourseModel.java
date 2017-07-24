@@ -2,9 +2,7 @@ package com.shaohong.thesethree.model;
 
 import android.content.Context;
 
-import com.shaohong.thesethree.bean.Edu;
 import com.shaohong.thesethree.bean.EduDetail;
-import com.shaohong.thesethree.bean.HistoryListItemObject;
 import com.shaohong.thesethree.bean.KJ;
 import com.shaohong.thesethree.utils.ConstantUtils;
 import com.shaohong.thesethree.utils.SharedPreferencesHelper;
@@ -114,16 +112,16 @@ public class CourseModel {
         if (response.isSuccessful()) {
             String result = response.body().string();
             if (!result.isEmpty()) {
-                JSONObject obj=new JSONObject(result);
-                if(obj.getString("result").equals("true"))
-                {
-                    JSONArray jsonArray=obj.getJSONArray("data");
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject lan = jsonArray.getJSONObject(i);
-                        KJ commonData = new KJ();
-
-                        list.add(commonData);
-                    }
+                JSONObject obj = new JSONObject(result);
+                JSONArray jsonArray = obj.getJSONArray("sps");
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject lan = jsonArray.getJSONObject(i);
+                    KJ commonData = new KJ();
+                    commonData.eduid=lan.getInt("eduid");
+                    commonData.id=lan.getInt("id");
+                    commonData.kjname=lan.getString("spname");
+                    commonData.kjurl=lan.getString("spurl");
+                    list.add(commonData);
                 }
             }
         } else {

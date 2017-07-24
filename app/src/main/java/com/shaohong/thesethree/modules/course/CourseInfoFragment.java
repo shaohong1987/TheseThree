@@ -119,7 +119,7 @@ public class CourseInfoFragment extends Fragment {
                         adapter.notifyDataSetChanged();
                         swipeRefreshLayout.setRefreshing(false);
                         adapter.notifyItemRemoved(adapter.getItemCount());
-                        swipeRefreshLayout.setRefreshing(false);//设置不刷新
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                     break;
                 case 2:
