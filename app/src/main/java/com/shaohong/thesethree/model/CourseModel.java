@@ -5,6 +5,7 @@ import android.content.Context;
 import com.shaohong.thesethree.bean.Edu;
 import com.shaohong.thesethree.bean.EduDetail;
 import com.shaohong.thesethree.bean.HistoryListItemObject;
+import com.shaohong.thesethree.bean.KJ;
 import com.shaohong.thesethree.utils.ConstantUtils;
 import com.shaohong.thesethree.utils.SharedPreferencesHelper;
 
@@ -99,11 +100,8 @@ public class CourseModel {
         return list;
     }
 
-    /*
-    * TODO:信息太多，需要考虑用何种数据类型
-    * */
-    public static List<EduDetail> getEduDetail(int eduId) throws IOException, JSONException{
-        List<EduDetail> list = new ArrayList<>();
+    public static List<KJ> getEduDetail(int eduId) throws IOException, JSONException{
+        List<KJ> list = new ArrayList<>();
         OkHttpClient client = new OkHttpClient();
         RequestBody formBody = new FormBody.Builder()
                 .add("eduid", String.valueOf(eduId))
@@ -122,7 +120,7 @@ public class CourseModel {
                     JSONArray jsonArray=obj.getJSONArray("data");
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject lan = jsonArray.getJSONObject(i);
-                        EduDetail commonData = new EduDetail();
+                        KJ commonData = new KJ();
 
                         list.add(commonData);
                     }

@@ -170,7 +170,7 @@ public class ExamActivity extends Activity {
         pagerAdapter = new ExaminationSubmitAdapter(ExamActivity.this,viewItems,mExam);
         viewPager.setAdapter(pagerAdapter);
         viewPager.getParent().requestDisallowInterceptTouchEvent(false);
-
+        new QJJUdpUtils().start();
     }
 
     public void initView() {
@@ -348,7 +348,14 @@ public class ExamActivity extends Activity {
                     int hour=second/(60*60);
                     int min=(second-hour*60*60)/60;
                     int sec=(second-hour*60*60-min*60);
-                    right.setText(hour+"小时"+min+"分钟"+sec+"秒");
+                    right.setText(hour+"时"+min+"分"+sec+"秒");
+                    break;
+                case 1012:
+                    Bundle bundle=msg.getData();
+                    String result=bundle.getString("data");
+                    //这边是否需要解析
+                    Toast.makeText(getApplicationContext(),"您已被监考官强制交卷",Toast.LENGTH_LONG).show();
+                    uploadExamination();
                     break;
             }
         }
@@ -385,6 +392,44 @@ public class ExamActivity extends Activity {
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
                 DatagramSocket socket = new DatagramSocket();
                 socket.send(packet);
+            } catch (SocketException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class QJJUdpUtils extends Thread {
+        @Override
+        public void run() {
+            try {
+                InetAddress address = InetAddress.getByName(ConstantUtils.UDP_SERVER_URL);
+                JSONObject object = new JSONObject();
+                object.put("type", 5);
+                object.put("code", 2);
+                object.put("usertype", 2);
+                object.put("testcode",mExam.getId());
+                object.put("userid", userInfo.get("userid"));
+                object.put("name", userInfo.get("name"));
+                byte[] data = object.toString().getBytes();
+                DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
+                DatagramSocket socket = new DatagramSocket();
+                socket.send(packet);
+                packet.setData(new byte[1024]);
+                packet.setLength(1024);
+                while (true) {
+                    socket.receive(packet);
+                    String result = new String(packet.getData(), packet.getOffset(), packet.getLength());
+                    Message message = new Message();
+                    message.what = 1012;
+                    Bundle bundle = new Bundle();
+                    bundle.putString("data", result);
+                    message.setData(bundle);
+                    handler.sendMessage(message);
+                }
             } catch (SocketException e) {
                 e.printStackTrace();
             } catch (IOException e) {

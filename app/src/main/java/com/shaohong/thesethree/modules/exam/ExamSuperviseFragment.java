@@ -24,11 +24,14 @@ import android.widget.Toast;
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.Exam;
 import com.shaohong.thesethree.bean.KaoSheng;
+import com.shaohong.thesethree.model.ExamModel;
 import com.shaohong.thesethree.model.UserModel;
 import com.shaohong.thesethree.myview.MyGridView;
 import com.shaohong.thesethree.utils.BarCodeUtils;
 import com.shaohong.thesethree.utils.ConstantUtils;
+import com.shaohong.thesethree.utils.ContextUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +50,7 @@ public class ExamSuperviseFragment extends Fragment {
     private HashMap<String, String> userInfo;
     private Exam mExam;
     private TextView djs_text_view;
+    private TextView statistic_jiankao_text_view;
     private Button control_exam_button;
     private List<KaoSheng> yJJList;
     private List<KaoSheng> wJJList;
@@ -57,6 +61,9 @@ public class ExamSuperviseFragment extends Fragment {
     private int seconds=0;
     Thread mThread;
     private boolean flag=true;
+    private String mString="";
+    private int yd;
+    private int qj;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +77,8 @@ public class ExamSuperviseFragment extends Fragment {
         Bundle bundle = getArguments();
         mExam = (Exam) bundle.get(ConstantUtils.EXAM_INFO);
         djs_text_view = (TextView) view.findViewById(R.id.djs_jiankao_text_view);
+        statistic_jiankao_text_view= (TextView) view.findViewById(R.id.statistic_jiankao_text_view);
+        statistic_jiankao_text_view.setText(mString);
         control_exam_button = (Button) view.findViewById(R.id.control_jiankao_button);
         if (mExam.getType() == 1) {
             control_exam_button.setOnClickListener(new View.OnClickListener() {
@@ -101,6 +110,7 @@ public class ExamSuperviseFragment extends Fragment {
         MyGridView WJJgridView = (MyGridView) view.findViewById(R.id.wei_jiao_juan_grid_view);
         mWJJAdapter = new WJJAdapter(getContext(), wJJList);
         WJJgridView.setAdapter(mWJJAdapter);
+        new GetKaoShengThread().start();
         new JianKaoThread().start();
         return view;
     }
@@ -140,6 +150,8 @@ public class ExamSuperviseFragment extends Fragment {
                             yJJList.add(kaoSheng);
                             mYJJAdapter.notifyDataSetChanged();
                         }
+                        mString="应到"+yd+"人，实到"+(yJJList.size()+wJJList.size())+"人，请假"+qj+"人";
+                        statistic_jiankao_text_view.setText(mString);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -151,6 +163,11 @@ public class ExamSuperviseFragment extends Fragment {
                     int min=(seconds-hour*60*60)/60;
                     int sec=(seconds-hour*60*60-min*60);
                     djs_text_view.setText(hour+"时"+min+"分"+sec+"秒");
+                    break;
+                case 1212:
+                    mYJJAdapter.notifyDataSetChanged();
+                    mWJJAdapter.notifyDataSetChanged();
+                    statistic_jiankao_text_view.setText(mString);
                     break;
             }
         }
@@ -206,6 +223,45 @@ public class ExamSuperviseFragment extends Fragment {
             }
         });
         builder.show();
+    }
+
+    class GetKaoShengThread extends Thread{
+        @Override
+        public void run() {
+            try {
+                if (ContextUtils.isLogin) {
+                    String data=ExamModel.GetKaoSheng(mExam.getId());
+                    if(data!=null){
+                        JSONObject obj=new JSONObject(data);
+                        yd=obj.getInt("yingdao");
+                        qj=obj.getInt("qingjia");
+                        JSONArray ek=obj.getJSONArray("endks");
+                        for (int i=0;i<ek.length();i++){
+                            JSONObject o=ek.getJSONObject(i);
+                            KaoSheng kaoSheng=new KaoSheng();
+                            kaoSheng.userName=o.getString("name");
+                            kaoSheng.userId=o.getInt("userid");
+                            yJJList.add(kaoSheng);
+                        }
+                        JSONArray ok=obj.getJSONArray("onks");
+                        for (int i=0;i<ok.length();i++) {
+                            JSONObject o = ek.getJSONObject(i);
+                            KaoSheng kaoSheng = new KaoSheng();
+                            kaoSheng.userName = o.getString("name");
+                            kaoSheng.userId = o.getInt("userid");
+                            wJJList.add(kaoSheng);
+                        }
+                        mString="应到"+yd+"人，实到"+(ok.length()+ek.length())+"人，请假"+qj+"人";
+                        handler.sendEmptyMessage(1212);
+                    }
+                }
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     class JianKaoThread extends Thread {

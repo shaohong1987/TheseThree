@@ -67,32 +67,35 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemViewHolder) {
-            EduDetail course = (EduDetail) data.get(position);
-            ((ItemViewHolder) holder).nameTextView.setText(course.zhuti);
-            ((ItemViewHolder) holder).dateTextView.setText(course.time);
-            ((ItemViewHolder) holder).addressTextView.setText(course.adress);
-            ((ItemViewHolder) holder).statusTextView.setText(course.state>0?"已报名":"未报名");
-            ((ItemViewHolder) holder).centTextView.setText(String.valueOf(course.score));
-            ((ItemViewHolder) holder).publisherTextView.setText(course.org);
-            ((ItemViewHolder) holder).publishDateTextView.setText(course.recordtime);
-            if (onItemClickListener != null) {
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int position = holder.getLayoutPosition();
-                        onItemClickListener.onItemClick(holder.itemView, position);
-                    }
-                });
+            if(position>=0&&position<data.size()){
+                EduDetail course = (EduDetail) data.get(position);
+                ((ItemViewHolder) holder).nameTextView.setText(course.zhuti);
+                ((ItemViewHolder) holder).dateTextView.setText(course.time);
+                ((ItemViewHolder) holder).addressTextView.setText(course.adress);
+                ((ItemViewHolder) holder).statusTextView.setText(course.state>0?"已报名":"未报名");
+                ((ItemViewHolder) holder).centTextView.setText(String.valueOf(course.score));
+                ((ItemViewHolder) holder).publisherTextView.setText(course.org);
+                ((ItemViewHolder) holder).publishDateTextView.setText(course.recordtime);
+                if (onItemClickListener != null) {
+                    holder.itemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            int position = holder.getLayoutPosition();
+                            onItemClickListener.onItemClick(holder.itemView, position);
+                        }
+                    });
 
-                holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        int position = holder.getLayoutPosition();
-                        onItemClickListener.onItemLongClick(holder.itemView, position);
-                        return false;
-                    }
-                });
+                    holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            int position = holder.getLayoutPosition();
+                            onItemClickListener.onItemLongClick(holder.itemView, position);
+                            return false;
+                        }
+                    });
+                }
             }
+
         }
     }
 

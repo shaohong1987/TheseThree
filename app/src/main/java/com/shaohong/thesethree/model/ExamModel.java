@@ -29,7 +29,6 @@ import okhttp3.Response;
  */
 
 public class ExamModel {
-
     //0 全院考试，m1 科室考试，2 专科考试
     public static List<Exam> GetExamList(Context context,int type) {
         List<Exam> exams=new ArrayList<>();
@@ -85,7 +84,6 @@ public class ExamModel {
         }catch (JSONException e) {
             e.printStackTrace();
         }
-
         return exams;
     }
 
@@ -118,7 +116,6 @@ public class ExamModel {
         }catch (JSONException e) {
             e.printStackTrace();
         }
-
         return result;
     }
 
@@ -166,7 +163,7 @@ public class ExamModel {
                 .url(ConstantUtils.REQUEST_URL+"ksqd")
                 .post(formBody)
                 .build();
-        Response response = null;
+        Response response;
         try {
             response = client.newCall(request).execute();
             if (response.isSuccessful()) {
@@ -290,11 +287,10 @@ public class ExamModel {
         return false;
     }
 
-    public static HashMap<String,Integer> GetKaoSheng(int testid){
-        HashMap<String,Integer> data=null;
+    public static String GetKaoSheng(int testid){
         OkHttpClient client = new OkHttpClient();
         RequestBody formBody = new FormBody.Builder()
-                .add("testId",String.valueOf(testid))
+                .add("testid",String.valueOf(testid))
                 .build();
         Request request = new Request.Builder()
                 .url(ConstantUtils.REQUEST_URL+"getkaosheng")
@@ -306,10 +302,9 @@ public class ExamModel {
             if (response.isSuccessful()) {
                 String res = response.body().string();
                 if (!res.isEmpty()) {
-                    data=new HashMap<>();
                     JSONObject obj=new JSONObject(res);
-                    if(obj.getString("result").equals("true")){
-
+                    if(obj.getString("result1").equals("true")&&obj.getString("result2").equals("true")){
+                        return res;
                     }
                 }
             }
@@ -318,6 +313,6 @@ public class ExamModel {
         }catch (JSONException e) {
             e.printStackTrace();
         }
-        return data;
+        return null;
     }
 }

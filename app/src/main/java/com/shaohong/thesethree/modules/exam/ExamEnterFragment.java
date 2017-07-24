@@ -233,6 +233,13 @@ public class ExamEnterFragment extends Fragment {
                     break;
                 case 10:
                     //解析数据，如果是开始考试，或是其他
+                    Bundle bundle=msg.getData();
+                    String result=bundle.getString("data");
+                    if(result.equals("endTest")){
+                        sign_button.setText("扫码签到");
+                        sign_button.setVisibility(View.GONE);
+                        Toast.makeText(getContext(),"该考试已被管理员结束",Toast.LENGTH_LONG).show();
+                    }
                     break;
             }
         }

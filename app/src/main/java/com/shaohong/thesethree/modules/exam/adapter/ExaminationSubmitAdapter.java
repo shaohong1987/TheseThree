@@ -387,13 +387,13 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
             holder.nextText.setText("提交");
             holder.nextImage.setImageResource(R.drawable.vote_submit_finish);
         }
-        holder.previousBtn.setOnClickListener(new LinearOnClickListener(position - 1, position, holder, 1));
-        holder.nextBtn.setOnClickListener(new LinearOnClickListener(position + 1, position, holder, 1));
-        holder.questionBtn.setOnClickListener(new LinearOnClickListener(position + 1, position, holder, 0));
+        holder.previousBtn.setOnClickListener(new LinearOnClickListener(position - 1, position, holder, 0));
+        holder.nextBtn.setOnClickListener(new LinearOnClickListener(position + 1, position, holder, 0));
+        holder.questionBtn.setOnClickListener(new LinearOnClickListener(position + 1, position, holder, 1));
         holder.totalBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Save(holder, position, 1);
+                Save(holder, position,0);
                 View popupView = mContext.getLayoutInflater().inflate(R.layout.popupwindow, null);
                 PopupWindow window = new PopupWindow(popupView, RelativeLayout.LayoutParams.MATCH_PARENT,
                         RelativeLayout.LayoutParams.WRAP_CONTENT, true);
@@ -603,12 +603,12 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
             button.setText(String.valueOf(position + 1));
             Paper paper = data.get(position);
             if (paper.getUserAnswer().isEmpty()) {
-                if (paper.getN() == (0)) {
+                if (paper.getN() == (1)) {
                     button.setBackgroundColor(ContextCompat.getColor(mContext, R.color.yellow));
                 } else
                     button.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorWhite));
             } else {
-                if (paper.getN() == (0)) {
+                if (paper.getN() == (1)) {
                     button.setBackgroundColor(ContextCompat.getColor(mContext, R.color.yellow));
                 } else
                     button.setBackgroundColor(ContextCompat.getColor(mContext, R.color.status_timu_1));

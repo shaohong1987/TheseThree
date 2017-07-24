@@ -45,6 +45,13 @@ public class ConstantUtils {
         return courseOptions;
     }
 
+    public static HashMap<Integer,String> COURSE_DETAIL_OPTIONS(){
+        HashMap<Integer,String> courseOptions=new HashMap<>();
+        courseOptions.put(0,"课件");
+        courseOptions.put(1,"在线讨论");
+        return courseOptions;
+    }
+
     //首页九宫格功能
     public static ArrayList<HashMap<String, Object>> COMMON_FUNCTIONS(){
         ArrayList<HashMap<String, Object>> commonFunctions=new ArrayList<>();
