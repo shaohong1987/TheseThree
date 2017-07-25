@@ -3,62 +3,66 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:background="@drawable/single_layout_selector"
-              android:orientation="horizontal"
-    android:layout_margin="@dimen/micro_margin">
+              android:orientation="vertical"
+              android:layout_margin="@dimen/micro_margin">
 
-    <ImageView
-        android:id="@+id/image_item_recycler_view_exam"
-        android:layout_width="48dp"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/small_margin"
-        android:contentDescription="图片"
-        android:src="@drawable/user_image"
-        android:layout_weight="0.08"/>
-
-    <LinearLayout
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/status_exam"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:fontFamily="sans-serif"
+        android:background="@color/pink"
+        android:text="已报名"
+        android:textSize="@dimen/small_font_size"
+        android:layout_marginTop="@dimen/micro_margin"
+        android:layout_marginLeft="@dimen/micro_margin"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/name_exam"
+        <ImageView
+            android:id="@+id/image_item_recycler_view_exam"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/micro_margin"
-            android:text="名称：三基考试"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif"
-            android:textSize="@dimen/medium_font_size"/>
+            android:layout_height="match_parent"
+            android:contentDescription="图片"
+            android:scaleType="fitXY"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/small_margin"
+            android:src="@drawable/user_image"
+            />
 
-        <TextView
-            android:id="@+id/datetime_exam"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/micro_margin"
-            android:text="时间：2017-05-28 14:30"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-light"
-            android:textSize="@dimen/medium_font_size"/>
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/address_exam"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/micro_margin"
-            android:textStyle="bold"
-            android:text="地点：第三会议室"
-            android:fontFamily="sans-serif-condensed"
-            android:textSize="@dimen/medium_font_size"/>
+            <TextView
+                android:id="@+id/name_exam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="名称：三基考试"
+                android:textColor="@color/darkslategrey"
+                android:textSize="@dimen/medium_font_size"/>
 
-        <TextView
-            android:id="@+id/status_exam"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/micro_margin"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-thin"
-            android:text="已报名"
-            android:textSize="@dimen/small_font_size"/>
+            <TextView
+                android:id="@+id/datetime_exam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/micro_margin"
+                android:text="时间：2017-05-28 14:30"
+                android:textColor="@color/darkslategrey"
+                android:textSize="@dimen/medium_font_size"/>
+
+            <TextView
+                android:id="@+id/address_exam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/micro_margin"
+                android:text="地点：第三会议室"
+                android:textColor="@color/darkslategrey"
+                android:textSize="@dimen/medium_font_size"/>
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

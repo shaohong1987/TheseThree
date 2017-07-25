@@ -62,9 +62,16 @@ public class ExamInfoFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_exam_info, container, false);
         ButterKnife.bind(this, view);
         initView();
+//        swipeRefreshLayout.setRefreshing(true);
+//        new LoadDataThread().start();
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         swipeRefreshLayout.setRefreshing(true);
         new LoadDataThread().start();
-        return view;
     }
 
     public void initView() {

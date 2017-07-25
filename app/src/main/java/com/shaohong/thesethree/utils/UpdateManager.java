@@ -5,20 +5,16 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
-import com.shaohong.thesethree.modules.exam.ExamActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,10 +27,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 
-import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
@@ -223,7 +217,7 @@ public class UpdateManager {
                 {
                     // 获取SDCard的路径
                     String sdPath = Environment.getExternalStorageDirectory() + "/";
-                    savePath = sdPath + "download";
+                    savePath = sdPath + "ehospital";
                     URL url = new URL(hashMap.get("url"));
                     // 创建连接
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();

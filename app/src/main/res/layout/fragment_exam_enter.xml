@@ -35,10 +35,12 @@
         android:textStyle="bold"/>
 
     <TextView
+        android:layout_marginLeft="@dimen/small_margin"
         android:id="@+id/name_exam_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="名称：全院护士三基考试"
+        android:layout_marginTop="@dimen/small_margin"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
@@ -46,6 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="时间：2017-05-12 17:30"
+        android:layout_marginLeft="@dimen/small_margin"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
@@ -53,6 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="地点：12号楼3层大会议室"
+        android:layout_marginLeft="@dimen/small_margin"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
@@ -73,6 +77,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="姓名：张三李四王二麻"
+        android:layout_marginTop="@dimen/small_margin"
+        android:layout_marginLeft="@dimen/small_margin"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
@@ -80,6 +86,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="工号：1029384756"
+        android:layout_marginLeft="@dimen/small_margin"
         android:textSize="@dimen/medium_font_size"/>
 
     <TextView
@@ -87,6 +94,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="科室：360°美容整形科"
+        android:layout_marginLeft="@dimen/small_margin"
         android:textSize="@dimen/medium_font_size"/>
 
     <Button

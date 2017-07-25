@@ -1,106 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:layout_margin="@dimen/small_margin"
               android:background="@drawable/single_layout_selector"
-    android:padding="@dimen/small_margin"
-    android:layout_marginTop="@dimen/small_margin">
+              android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/status_course"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPink"
+            android:text="已报名"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/small_font_size"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/publisher_course"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/small_margin"
+            android:background="@color/colorBlue"
+            android:fontFamily="sans-serif-thin"
+            android:text="护理部"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/small_font_size"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/publish_date_course"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="2017-05-10"
+            android:textColor="@color/colorPink"
+            android:textSize="@dimen/small_font_size"
+            android:textStyle="bold"/>
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/status_course"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-thin"
-        android:text="已报名"
-        android:textSize="@dimen/small_font_size"
-        android:background="@color/colorPink"
-        android:textColor="@color/colorWhite"/>
-
-    <TextView
-        android:id="@+id/publisher_course"
-        android:layout_toRightOf="@id/status_course"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-thin"
-        android:layout_marginLeft="@dimen/small_margin"
-        android:text="护理部"
-        android:textStyle="bold"
-        android:textSize="@dimen/small_font_size"
-        android:textColor="@color/colorWhite"
-        android:background="@color/colorBlue"/>
-
-    <TextView
-        android:id="@+id/publish_date_course"
-        android:layout_alignParentRight="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif"
-        android:text="2017-05-10"
-        android:textSize="@dimen/small_font_size"
-        android:textColor="@color/colorPink"/>
-
-    <TextView
-        android:layout_below="@id/status_course"
         android:id="@+id/name_course"
-        android:layout_marginTop="@dimen/small_margin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin"
         android:text="导管质控小组培训"
-        android:fontFamily="sans-serif-thin"
-        android:textStyle="bold"
         android:textColor="@color/colorBlack"
         android:textSize="@dimen/large_font_size"/>
 
-    <ImageView
-        android:id="@+id/location_image"
-        android:layout_below="@id/name_course"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_location_on_black_24dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/address_course"
-        android:layout_toRightOf="@id/location_image"
-        android:layout_below="@id/name_course"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/micro_margin"
-        android:text="第三会议室"
-        android:fontFamily="sans-serif"
-        android:textSize="@dimen/medium_font_size"/>
+        <ImageView
+            android:id="@+id/location_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/name_course"
+            android:src="@drawable/ic_location_on_black_24dp"/>
 
-    <ImageView
-        android:id="@+id/date_image"
-        android:layout_below="@id/location_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_access_time_black_24dp"/>
+        <TextView
+            android:id="@+id/address_course"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/name_course"
+            android:layout_marginTop="@dimen/small_margin"
+            android:layout_toRightOf="@id/location_image"
+            android:text="第三会议室"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/medium_font_size"/>
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/date_course"
-        android:layout_toRightOf="@id/date_image"
-        android:layout_below="@id/address_course"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/micro_margin"
-        android:text="2017-05-28 至 2017-06-20"
-        android:fontFamily="sans-serif"
-        android:textSize="@dimen/medium_font_size"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/cent_course"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/micro_margin"
-        android:text="3.0分"
-        android:textStyle="bold"
-        android:textColor="@color/colorPink"
-        android:fontFamily="sans-serif"
-        android:textSize="@dimen/medium_font_size"/>
+        <ImageView
+            android:id="@+id/date_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/location_image"
+            android:src="@drawable/ic_access_time_black_24dp"/>
 
+        <TextView
+            android:id="@+id/date_course"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/address_course"
+            android:layout_marginTop="@dimen/micro_margin"
+            android:layout_toRightOf="@id/date_image"
+            android:text="2017-05-28 至 2017-06-20"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/medium_font_size"/>
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/cent_course"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="3.0分"
+            android:textColor="@color/colorPink"
+            android:textSize="@dimen/medium_font_size"
+            android:textStyle="bold"/>
+    </LinearLayout>
+</LinearLayout>

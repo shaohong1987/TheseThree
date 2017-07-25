@@ -72,7 +72,7 @@ public class ExamRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             {
                 Exam exam = (Exam) data.get(position);
                 ((ItemViewHolder) holder).nameTextView.setText(exam.getTitle());
-                ((ItemViewHolder) holder).nameTextView.setTextColor(resource.getColorStateList(R.color.colorBlack));
+                //((ItemViewHolder) holder).nameTextView.setTextColor(resource.getColorStateList(R.color.colorBlack));
                 ((ItemViewHolder) holder).datetimeTextView.setText(exam.getStartTime());
                 ((ItemViewHolder) holder).addressTextView.setText(exam.getAddress());
                 ((ItemViewHolder) holder).imageImageView.setImageResource(getImageId(exam.getStartTime()));

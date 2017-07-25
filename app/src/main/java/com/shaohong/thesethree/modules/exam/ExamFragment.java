@@ -12,13 +12,11 @@ import android.widget.TextView;
 import com.astuetz.PagerSlidingTabStrip;
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.base.BaseFragment;
-import com.shaohong.thesethree.bean.Exam;
 import com.shaohong.thesethree.model.ExamModel;
 import com.shaohong.thesethree.modules.exam.adapter.ExamPagerAdapter;
 import com.shaohong.thesethree.utils.ContextUtils;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class ExamFragment extends BaseFragment {
 
@@ -66,6 +64,11 @@ public class ExamFragment extends BaseFragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        new LoadDataThread().start();
+    }
 
     class LoadDataThread extends Thread {
         @Override

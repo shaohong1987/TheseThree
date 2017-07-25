@@ -1,8 +1,5 @@
 package com.shaohong.thesethree.modules.exam.adapter;
 
-import java.util.List;
-import java.util.Map;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +9,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.shaohong.thesethree.R;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 我的错题列表
