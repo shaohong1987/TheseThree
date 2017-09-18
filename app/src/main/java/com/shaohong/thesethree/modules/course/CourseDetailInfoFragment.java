@@ -7,15 +7,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.KJ;
@@ -28,23 +25,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class CourseDetailInfoFragment extends Fragment {
-
+    ListView listView;
     ArrayAdapter<String> adapter;
     public int courseId = 1;
-    private ListView listView;
     private List<KJ> mKJs = new ArrayList<>();
     private List<String> data=new ArrayList<>();
+
+    public CourseActivity mCourseActivity;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_course_detail_info, container, false);
         ButterKnife.bind(this, view);
         adapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,data);
-        ListView listView=(ListView)view.findViewById(R.id.kj_course_detail_list_view);
+        listView = (ListView) view.findViewById(R.id.kj_course_detail_list_view);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -70,9 +68,6 @@ public class CourseDetailInfoFragment extends Fragment {
                         adapter.notifyDataSetChanged();
                     }
                     break;
-                case 3:
-                    Toast.makeText(getContext(),"操作失败",Toast.LENGTH_LONG).show();
-                    break;
             }
         }
     };
@@ -83,7 +78,7 @@ public class CourseDetailInfoFragment extends Fragment {
                 if (ContextUtils.isLogin) {
                     data.clear();
                     mKJs.clear();
-                    List< KJ> kjs = CourseModel.getEduDetail(courseId);
+                    List<KJ> kjs = CourseModel.getEduDetail(getContext(), courseId);
                     if(kjs!=null&&kjs.size()>0){
                         for (int i=0;i<kjs.size();i++){
                             mKJs.add(kjs.get(i));
@@ -92,11 +87,7 @@ public class CourseDetailInfoFragment extends Fragment {
                     }
                 }
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | JSONException | IOException e) {
                 e.printStackTrace();
             }
             handler.sendEmptyMessage(1);

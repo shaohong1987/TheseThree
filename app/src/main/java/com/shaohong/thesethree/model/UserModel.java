@@ -2,6 +2,8 @@ package com.shaohong.thesethree.model;
 
 import android.content.Context;
 
+import com.shaohong.thesethree.bean.Paper;
+import com.shaohong.thesethree.database.DbManager;
 import com.shaohong.thesethree.utils.ConstantUtils;
 import com.shaohong.thesethree.utils.ContextUtils;
 import com.shaohong.thesethree.utils.SharedPreferencesHelper;
@@ -11,6 +13,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -100,5 +103,13 @@ public class UserModel {
             return false;
         }
         return true;
+    }
+
+    public static List<Paper> getMistakeBook(Context context, int id) {
+        DbManager dbManager = new DbManager(context);
+        dbManager.openDB();
+        List<Paper> list = dbManager.getMistakeBook(id);
+        dbManager.closeDB();
+        return list;
     }
 }

@@ -14,6 +14,14 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String DB_NAME = "TheseThreeDB";
     static final int VERSION = 1;
 
+    //试卷表
+    static final String TABLE_NAME_TEST = "table_test";
+    static final String TEST_ID = "id";
+    static final String TEST_COL_ID = "test_id";
+    static final String TEST_COL_NAME = "test_name";
+    static final String TEST_COL_SCROE = "test_score";
+    static final String TEST_COL_JIGE = "test_jige_score";
+
     //试卷数据
     static final String TABLE_NAME_TEST_LIBRARY = "table_test_library";
     static final String TEST_LIBRARY_COL_ID = "test_id";
@@ -101,8 +109,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 + TEST_LIBRARY_QUESTION_OPTION_I + " TEXT,"
                 + TEST_LIBRARY_QUESTION_OPTION_J + " TEXT)";
         db.execSQL(createTable_testLibrary);
-
         DbUpdateV2(db);
+        DbUpdateV3(db);
     }
 
     @Override
@@ -111,6 +119,9 @@ public class DBHelper extends SQLiteOpenHelper {
             switch (i) {
                 case 2:
                     DbUpdateV2(db);
+                    break;
+                case 3:
+                    DbUpdateV3(db);
                     break;
                 default:
                     break;
@@ -133,5 +144,16 @@ public class DBHelper extends SQLiteOpenHelper {
                 + NOTICE_COL_ISVALUED + " TEXT,"
                 + NOTICE_COL_SHOW + " INTEGER)";
         db.execSQL(createTable_notice);
+    }
+
+    private void DbUpdateV3(SQLiteDatabase db) {
+        String createTable_test = "CREATE TABLE "
+                + TABLE_NAME_TEST + " ("
+                + TEST_ID + " INTEGER PRIMARY KEY autoincrement,"
+                + TEST_COL_ID + " INTEGER,"
+                + TEST_COL_NAME + " TEXT,"
+                + TEST_COL_SCROE + " TEXT,"
+                + TEST_COL_JIGE + " TEXT)";
+        db.execSQL(createTable_test);
     }
 }

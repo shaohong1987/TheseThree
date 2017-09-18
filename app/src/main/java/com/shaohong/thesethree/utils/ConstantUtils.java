@@ -26,6 +26,7 @@ public class ConstantUtils {
     public static final String ITEM_TEXT="ItemText";
 
     public static final int UDP_PORT=1712;
+    //public static final int UDP_RECEIVE_PORT=1987;
     public static final String UDP_SERVER_URL="api.js00000000.com";
     //考试类型
     public static HashMap<Integer,String> EXAM_OPTIONS() {
@@ -39,8 +40,8 @@ public class ConstantUtils {
     //培训类型
     public static HashMap<Integer,String> COURSE_OPTIONS(){
         HashMap<Integer,String> courseOptions=new HashMap<>();
-        courseOptions.put(0,"院内培训");
-        courseOptions.put(1,"院外培训");
+        courseOptions.put(0, "院级培训");
+        courseOptions.put(1, "科室培训");
         courseOptions.put(2,"我参加的");
         return courseOptions;
     }

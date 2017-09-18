@@ -15,60 +15,69 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/small_margin"
         android:orientation="vertical">
+
         <LinearLayout
-            android:layout_marginTop="@dimen/medium_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/medium_margin">
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="主讲人:"
                 android:gravity="right"
-                android:textSize="@dimen/medium_font_size"
-                android:textColor="@color/black"/>
+                android:text="主讲人:"
+                android:textColor="@color/black"
+                android:textSize="@dimen/medium_font_size"/>
+
             <TextView
                 android:id="@+id/teacher_course_detail_text_view"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:text="习近平"
-                android:textSize="@dimen/medium_font_size"
-                android:textColor="@color/black"/>
+                android:textColor="@color/black"
+                android:textSize="@dimen/medium_font_size"/>
         </LinearLayout>
+
         <LinearLayout
-            android:layout_marginTop="@dimen/small_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_margin">
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text=" 主题:"
                 android:gravity="right"
-                android:textSize="@dimen/medium_font_size"
-                android:textColor="@color/black"/>
+                android:text=" 主题:"
+                android:textColor="@color/black"
+                android:textSize="@dimen/medium_font_size"/>
+
             <TextView
                 android:id="@+id/zhuti_course_detail_text_view"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:text="一带一路的政治经济意义"
-                android:textSize="@dimen/medium_font_size"
-                android:textColor="@color/black"/>
+                android:textColor="@color/black"
+                android:textSize="@dimen/medium_font_size"/>
         </LinearLayout>
+
         <LinearLayout
-            android:layout_marginTop="@dimen/small_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_margin">
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="简介:"
                 android:gravity="right"
-                android:textSize="@dimen/medium_font_size"
-                android:textColor="@color/black"/>
+                android:text="简介:"
+                android:textColor="@color/black"
+                android:textSize="@dimen/medium_font_size"/>
+
             <TextView
                 android:id="@+id/jianjie_course_detail_text_view"
                 android:layout_width="0dp"
@@ -78,34 +87,28 @@
                 android:textSize="@dimen/medium_font_size"/>
         </LinearLayout>
     </LinearLayout>
-    <ScrollView
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-        <LinearLayout
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.astuetz.PagerSlidingTabStrip
+            android:id="@+id/tabs_course_detail"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="48dp"
             android:layout_marginTop="@dimen/small_margin"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:background="@color/colorWhite"
+            app:pstsIndicatorColor="@color/colorBlue"
+            app:pstsIndicatorHeight="2dp"
+            app:pstsShouldExpand="true"
+            app:pstsUnderlineHeight="2dp"/>
 
-            <com.astuetz.PagerSlidingTabStrip
-                android:id="@+id/tabs_course_detail"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="@dimen/small_margin"
-                android:background="@color/colorWhite"
-                app:pstsIndicatorColor="@color/colorBlue"
-                app:pstsIndicatorHeight="2dp"
-                app:pstsShouldExpand="true"
-                app:pstsUnderlineHeight="2dp"/>
-
-            <android.support.v4.view.ViewPager
-                android:id="@+id/viewPager_course_detail"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/colorWhite"/>
-        </LinearLayout>
-    </ScrollView>
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewPager_course_detail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorWhite"/>
+    </LinearLayout>
 
 </LinearLayout>

@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 
 import com.shaohong.thesethree.R;
 import com.shaohong.thesethree.bean.Exam;
+import com.shaohong.thesethree.bean.SimpleExam;
+import com.shaohong.thesethree.database.DbManager;
 import com.shaohong.thesethree.model.ExamModel;
 import com.shaohong.thesethree.modules.exam.adapter.ExamRecyclerViewAdapter;
 import com.shaohong.thesethree.utils.ConstantUtils;
@@ -37,13 +39,14 @@ public class ExamInfoFragment extends Fragment {
     @BindView(R.id.recyclerView_exam)
     RecyclerView recyclerView;
     public int examType = 1;
-    private Handler handler = new Handler(){
+    private List<SimpleExam> mList;
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.what) {
                 case 1:
-                    if (swipeRefreshLayout.isRefreshing()){
+                    if (swipeRefreshLayout.isRefreshing()) {
                         adapter.notifyDataSetChanged();
                         swipeRefreshLayout.setRefreshing(false);//设置不刷新
                     }
@@ -62,6 +65,10 @@ public class ExamInfoFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_exam_info, container, false);
         ButterKnife.bind(this, view);
         initView();
+        DbManager dbManager = new DbManager(getContext());
+        dbManager.openDB();
+        mList = dbManager.getExams();
+        dbManager.closeDB();
 //        swipeRefreshLayout.setRefreshing(true);
 //        new LoadDataThread().start();
         return view;
@@ -115,15 +122,26 @@ public class ExamInfoFragment extends Fragment {
         });
     }
 
-    class LoadDataThread extends Thread{
+    class LoadDataThread extends Thread {
         @Override
         public void run() {
             try {
-                if(ContextUtils.isLogin){
+                if (ContextUtils.isLogin) {
                     data.clear();
                     List<Exam> exams = ExamModel.GetExamList(getContext(), examType);
-                    if(exams!=null&&exams.size()>0){
-                        data.addAll(exams);
+                    if (exams != null && exams.size() > 0) {
+                        for (int i = 0; i < exams.size(); i++) {
+                            Exam exam = exams.get(i);
+                            exam.setFen(-1);
+                            if (mList != null && mList.size() > 0)
+                                for (int j = 0; j < mList.size(); j++) {
+                                    SimpleExam simpleExam = mList.get(j);
+                                    if (simpleExam.getId() == exam.getId()) {
+                                        exam.setFen(simpleExam.getScore());
+                                    }
+                                }
+                            data.add(exam);
+                        }
                     }
                 }
                 Thread.sleep(1000);

@@ -5,17 +5,6 @@
               android:background="@drawable/single_layout_selector"
               android:orientation="vertical"
               android:layout_margin="@dimen/micro_margin">
-
-    <TextView
-        android:id="@+id/status_exam"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:background="@color/pink"
-        android:text="已报名"
-        android:textSize="@dimen/small_font_size"
-        android:layout_marginTop="@dimen/micro_margin"
-        android:layout_marginLeft="@dimen/micro_margin"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,8 +12,8 @@
 
         <ImageView
             android:id="@+id/image_item_recycler_view_exam"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:contentDescription="图片"
             android:scaleType="fitXY"
             android:layout_gravity="center"
@@ -33,6 +22,7 @@
             />
 
         <LinearLayout
+            android:layout_marginTop="@dimen/small_margin"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -43,26 +33,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="名称：三基考试"
-                android:textColor="@color/darkslategrey"
+                android:textColor="@color/darkgray"
                 android:textSize="@dimen/medium_font_size"/>
 
             <TextView
                 android:id="@+id/datetime_exam"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/micro_margin"
+                android:layout_marginTop="@dimen/small_margin"
                 android:text="时间：2017-05-28 14:30"
-                android:textColor="@color/darkslategrey"
+                android:textColor="@color/darkgray"
                 android:textSize="@dimen/medium_font_size"/>
 
             <TextView
                 android:id="@+id/address_exam"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/micro_margin"
+                android:layout_marginTop="@dimen/small_margin"
                 android:text="地点：第三会议室"
-                android:textColor="@color/darkslategrey"
+                android:textColor="@color/darkgray"
                 android:textSize="@dimen/medium_font_size"/>
         </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/exam_result_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorDarkBlue"
+        android:layout_marginLeft="@dimen/medium_margin"
+        android:textSize="@dimen/medium_font_size"
+        android:text="本次考试得分：80，总分：100"/>
 </LinearLayout>

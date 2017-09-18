@@ -1,7 +1,6 @@
 package com.shaohong.thesethree.modules.course.adapter;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,12 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shaohong.thesethree.R;
-import com.shaohong.thesethree.bean.Course;
-import com.shaohong.thesethree.bean.Edu;
 import com.shaohong.thesethree.bean.EduDetail;
 import com.shaohong.thesethree.utils.ContextUtils;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -95,7 +90,6 @@ public class CourseRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView
                     });
                 }
             }
-
         }
     }
 

@@ -21,7 +21,7 @@ public class ContextUtils extends Application {
     public static List<Paper> mPapers;
     public static int testId;
     public static List<UserAnswer> mUserAnswers;
-
+    public static int temp;
     private static ContextUtils instance;
 
     public static ContextUtils getInstance() {

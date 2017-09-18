@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.shaohong.thesethree"
-          android:versionCode="2">
+          package="com.shaohong.thesethree">
 
     <permission
         android:name="${applicationId}.permission.JPUSH_MESSAGE"
         android:protectionLevel="signature"/>
-
     <!-- Required  一些系统要求的权限，如访问网络等 -->
     <uses-permission android:name="${applicationId}.permission.JPUSH_MESSAGE"/>
     <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT"/>
@@ -49,9 +47,6 @@
         </activity>
         <activity android:name=".modules.exam.ExamInfoActivity">
         </activity>
-        <activity
-            android:name="com.google.zxing.activity.CaptureActivity"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
         <activity android:name=".modules.exam.ExamActivity">
         </activity>
         <activity
@@ -60,7 +55,9 @@
         </activity>
         <activity android:name=".activities.CommonActivity">
         </activity>
-        <activity android:name=".modules.course.CourseActivity">
+        <activity
+            android:name=".modules.course.CourseActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize">
         </activity>
         <activity
             android:name="cn.jpush.android.ui.PushActivity"
@@ -151,6 +148,16 @@
             android:value="6c0b58e6f2e72dac11c55bb9"/>
 
         <activity android:name=".modules.home.NoticeActivity">
+        </activity>
+        <activity android:name=".modules.exam.ExamResultActivity">
+        </activity>
+        <activity android:name=".modules.personal.MistakeBookActivity">
+        </activity>
+        <activity android:name=".modules.personal.MistakeTimuActivity">
+        </activity>
+        <activity android:name=".modules.course.CourseExamActivity">
+        </activity>
+        <activity android:name=".modules.course.CourseExamResultActivity">
         </activity>
     </application>
 

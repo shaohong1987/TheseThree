@@ -1,7 +1,6 @@
 package com.shaohong.thesethree.modules.exam.adapter;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,15 +66,19 @@ public class ExamRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemViewHolder) {
-            Resources resource = context.getResources();
-            if(!data.isEmpty()&&data.size()>position)
-            {
+            if (!data.isEmpty() && data.size() > position) {
                 Exam exam = (Exam) data.get(position);
                 ((ItemViewHolder) holder).nameTextView.setText(exam.getTitle());
                 //((ItemViewHolder) holder).nameTextView.setTextColor(resource.getColorStateList(R.color.colorBlack));
-                ((ItemViewHolder) holder).datetimeTextView.setText(exam.getStartTime());
+                ((ItemViewHolder) holder).datetimeTextView.setText(exam.getStartTime().substring(0, exam.getStartTime
+                        ().length() - 3));
                 ((ItemViewHolder) holder).addressTextView.setText(exam.getAddress());
                 ((ItemViewHolder) holder).imageImageView.setImageResource(getImageId(exam.getStartTime()));
+                if (exam.getFen() > -1)
+                    ((ItemViewHolder) holder).resultTextView.setText(String.valueOf("考试得分:" + exam.getFen() + "分"));
+                else {
+                    ((ItemViewHolder) holder).resultTextView.setText("未参加");
+                }
                 if (onItemClickListener != null) {
                     holder.itemView.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -98,12 +101,12 @@ public class ExamRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
     }
 
-    int getImageId(String dt){
-        int result=0;
-        SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    int getImageId(String dt) {
+        int result = 0;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = format.parse(dt);
-            int i=date.getMonth()+1;
+            int i = date.getMonth() + 1;
             switch (i) {
                 case 1:
                     result = R.drawable.m1;
@@ -154,13 +157,16 @@ public class ExamRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         TextView addressTextView;
         TextView statusTextView;
         ImageView imageImageView;
+        TextView resultTextView;
+
         public ItemViewHolder(View view) {
             super(view);
             nameTextView = (TextView) view.findViewById(R.id.name_exam);
             datetimeTextView = (TextView) view.findViewById(R.id.datetime_exam);
             addressTextView = (TextView) view.findViewById(R.id.address_exam);
-            statusTextView = (TextView) view.findViewById(R.id.status_exam);
-            imageImageView= (ImageView) view.findViewById(R.id.image_item_recycler_view_exam);
+            //statusTextView = (TextView) view.findViewById(R.id.status_exam);
+            imageImageView = (ImageView) view.findViewById(R.id.image_item_recycler_view_exam);
+            resultTextView = (TextView) view.findViewById(R.id.exam_result_text_view);
         }
     }
 }

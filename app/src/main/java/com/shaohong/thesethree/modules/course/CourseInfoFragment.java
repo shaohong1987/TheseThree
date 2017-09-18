@@ -16,15 +16,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
-import com.shaohong.thesethree.bean.Course;
-import com.shaohong.thesethree.bean.Edu;
 import com.shaohong.thesethree.bean.EduDetail;
-import com.shaohong.thesethree.bean.Exam;
-import com.shaohong.thesethree.bean.HistoryListItemObject;
-import com.shaohong.thesethree.database.DbManager;
 import com.shaohong.thesethree.model.CourseModel;
-import com.shaohong.thesethree.model.ExamModel;
-import com.shaohong.thesethree.model.HomeModel;
 import com.shaohong.thesethree.modules.course.adapter.CourseRecyclerViewAdapter;
 import com.shaohong.thesethree.utils.ConstantUtils;
 import com.shaohong.thesethree.utils.ContextUtils;
@@ -32,9 +25,7 @@ import com.shaohong.thesethree.utils.ContextUtils;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -145,18 +136,14 @@ public class CourseInfoFragment extends Fragment {
                     }
                 }
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | JSONException | IOException e) {
                 e.printStackTrace();
             }
             handler.sendEmptyMessage(1);
         }
     }
 
-    class GetCourseStateThread extends Thread{
+    private class GetCourseStateThread extends Thread {
         @Override
         public void run() {
             int result=0;
@@ -166,11 +153,7 @@ public class CourseInfoFragment extends Fragment {
                     result=flag?2:3;
                 }
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | JSONException | IOException e) {
                 e.printStackTrace();
             }
             handler.sendEmptyMessage(result);//通过handler发送一个更新数据的标记

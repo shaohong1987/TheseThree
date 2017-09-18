@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">医护 E 家</string>
+    <string name="app_name">医护 e 家</string>
 
     <!--权限申请 -->
     <string name="content_request_permission">为保证应用正常运行，请授予必要权限！</string>
@@ -20,9 +20,9 @@
     <string name="soft_update_info">发现新版本，是否立即更新？</string>
     <string name="soft_update_cancel">取消</string>
     <string name="soft_updating">正在下载，请稍候...</string>
-    <string name="title_1_exam">获得学分</string>
+    <string name="title_1_exam">近期待参加考试</string>
     <string name="title_2_exam">已参加考试</string>
-    <string name="title_3_exam">正确率</string>
+    <string name="title_3_exam">及格率</string>
 
     <string name="loading">加载中…</string>
     <string name="sign_exam">（扫码签到）</string>

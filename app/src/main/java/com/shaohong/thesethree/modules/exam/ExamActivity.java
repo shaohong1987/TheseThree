@@ -2,8 +2,6 @@ package com.shaohong.thesethree.modules.exam;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnKeyListener;
 import android.content.Intent;
@@ -21,9 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
-import com.shaohong.thesethree.activities.MainActivity;
 import com.shaohong.thesethree.bean.Exam;
 import com.shaohong.thesethree.bean.Paper;
+import com.shaohong.thesethree.bean.SimpleExam;
 import com.shaohong.thesethree.bean.UserAnswer;
 import com.shaohong.thesethree.database.DbManager;
 import com.shaohong.thesethree.model.ExamModel;
@@ -69,6 +67,8 @@ public class ExamActivity extends Activity {
     int isFirst;
     private HashMap<String, String> userInfo;
     private boolean flag=true;
+    private String result;
+    private int type;
 
     Handler handlerTime = new Handler() {
         public void handleMessage(Message msg) {
@@ -82,6 +82,7 @@ public class ExamActivity extends Activity {
                     isFirst+=1;
                     if(isFirst==1){
                         Toast.makeText(getApplicationContext(),"考试结束，正在进行自动交卷",Toast.LENGTH_SHORT).show();
+                        type = 1;
                         uploadExamination();
                     }
                     right.setText("00:00");
@@ -126,7 +127,7 @@ public class ExamActivity extends Activity {
                     }
                 }
             }
-        };
+        }
     };
 
     @Override
@@ -195,11 +196,7 @@ public class ExamActivity extends Activity {
             mScroller.setAccessible(true);
             ViewPagerScroller scroller = new ViewPagerScroller(viewPager.getContext());
             mScroller.set(viewPager, scroller);
-        }catch(NoSuchFieldException e){
-
-        }catch (IllegalArgumentException e){
-
-        }catch (IllegalAccessException e){
+        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException ignored) {
 
         }
     }
@@ -217,10 +214,12 @@ public class ExamActivity extends Activity {
 
     // 提交试卷
     public void uploadExamination() {
+        int cent = 0;
         flag=false;
         List<UserAnswer> list=new ArrayList<>();
         DbManager db=new DbManager(getApplicationContext());
         db.openDB();
+
         for (int i=0;i<ContextUtils.mPapers.size();i++){
             Paper paper=ContextUtils.mPapers.get(i);
             //写本地数据库
@@ -233,8 +232,18 @@ public class ExamActivity extends Activity {
             userAnswer.seq=paper.getSeq();
             userAnswer.testid=ContextUtils.testId;
             userAnswer.timuid=paper.getId();
+            if (userAnswer.isright > 0) {
+                cent += userAnswer.score;
+            }
             list.add(userAnswer);
         }
+        SimpleExam exam = new SimpleExam();
+        exam.setId(mExam.getId());
+        exam.setExamName(mExam.getTitle());
+        exam.setScore(cent);
+        exam.setJigeScore(mExam.getJiGeScore());
+        db.insertTest(exam);
+        result = cent + "(" + mExam.getJiGeScore() + ")";
         ContextUtils.mUserAnswers=list;
         db.closeDB();
         if(ContextUtils.mUserAnswers!=null&&ContextUtils.mUserAnswers.size()>0){
@@ -256,6 +265,7 @@ public class ExamActivity extends Activity {
         confirm_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                type = 1;
                 uploadExamination();
             }
         });
@@ -297,6 +307,7 @@ public class ExamActivity extends Activity {
         if (outTime != null) {
             long between = (new Date().getTime() - outTime.getTime()) / 1000;
             if (between > 5) {
+                type = 2;
                 uploadExamination();
                 Toast.makeText(this, "退出时间大于5秒，系统已自动交卷", Toast.LENGTH_LONG).show();
                 finish();
@@ -338,7 +349,8 @@ public class ExamActivity extends Activity {
             switch (msg.what){
                 case 1:
                     Toast.makeText(getApplicationContext(),"交卷成功",Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), ExamResultActivity.class);
+                    intent.putExtra("result", result);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
@@ -355,6 +367,7 @@ public class ExamActivity extends Activity {
                     String result=bundle.getString("data");
                     //这边是否需要解析
                     Toast.makeText(getApplicationContext(),"您已被监考官强制交卷",Toast.LENGTH_LONG).show();
+                    type = 3;
                     uploadExamination();
                     break;
             }
@@ -366,7 +379,7 @@ public class ExamActivity extends Activity {
         public void run() {
             try {
                 if(ContextUtils.isLogin){
-                    ExamModel.UploadPaper(getApplicationContext());
+                    ExamModel.UploadPaper(getApplicationContext(), type);
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -420,6 +433,7 @@ public class ExamActivity extends Activity {
                 socket.send(packet);
                 packet.setData(new byte[1024]);
                 packet.setLength(1024);
+
                 while (true) {
                     socket.receive(packet);
                     String result = new String(packet.getData(), packet.getOffset(), packet.getLength());

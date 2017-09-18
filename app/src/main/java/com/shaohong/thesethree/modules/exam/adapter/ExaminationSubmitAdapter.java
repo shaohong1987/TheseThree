@@ -27,14 +27,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.shaohong.thesethree.R;
-import com.shaohong.thesethree.activities.MainActivity;
 import com.shaohong.thesethree.bean.Exam;
 import com.shaohong.thesethree.bean.Paper;
+import com.shaohong.thesethree.bean.SimpleExam;
 import com.shaohong.thesethree.bean.UserAnswer;
 import com.shaohong.thesethree.database.DbManager;
 import com.shaohong.thesethree.model.ExamModel;
 import com.shaohong.thesethree.model.UserModel;
 import com.shaohong.thesethree.modules.exam.ExamActivity;
+import com.shaohong.thesethree.modules.exam.ExamResultActivity;
 import com.shaohong.thesethree.myview.MyGridView;
 import com.shaohong.thesethree.utils.ConstantUtils;
 import com.shaohong.thesethree.utils.ContextUtils;
@@ -46,18 +47,18 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class ExaminationSubmitAdapter extends PagerAdapter {
 
-    ExamActivity mContext;
-    List<View> viewItems;
-    View convertView;
-    Exam mExam;
+    private ExamActivity mContext;
+    private List<View> viewItems;
+    private View convertView;
+    private Exam mExam;
     private HashMap<String, String> userInfo;
+    private String result;
 
     public ExaminationSubmitAdapter(ExamActivity context, List<View> viewItems, Exam exam) {
         mContext = context;
@@ -79,9 +80,11 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, final int position) {
         final ViewHolder holder = new ViewHolder();
         convertView = viewItems.get(position);
+        holder.questionAnli = (TextView) convertView.findViewById(R.id.activity_prepare_test_anli);
         holder.questionType = (TextView) convertView.findViewById(R.id.activity_prepare_test_no);
         holder.question = (TextView) convertView.findViewById(R.id.activity_prepare_test_question);
         holder.previousBtn = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_upLayout);
+        holder.questionBottom = (TextView) convertView.findViewById(R.id.question_button);
         holder.nextBtn = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_nextLayout);
         holder.totalBtn = (LinearLayout) convertView.findViewById(R.id.activity_prepare_test_totalLayout);
         holder.nextText = (TextView) convertView.findViewById(R.id.menu_bottom_nextTV);
@@ -120,58 +123,76 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         holder.tvJ = (TextView) convertView.findViewById(R.id.vote_submit_select_text_j);
         holder.totalText.setText(position + 1 + "/" + ContextUtils.mPapers.size());
 
-        if (ContextUtils.mPapers.get(position).getItemA().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemA().isEmpty()) {
+            holder.layoutA.setVisibility(View.VISIBLE);
+            holder.tvA.setText("A." + ContextUtils.mPapers.get(position).getItemA());
+        } else {
             holder.layoutA.setVisibility(View.GONE);
+            holder.tvA.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemB().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemB().isEmpty()) {
+            holder.layoutB.setVisibility(View.VISIBLE);
+            holder.tvB.setText("B." + ContextUtils.mPapers.get(position).getItemB());
+        } else {
             holder.layoutB.setVisibility(View.GONE);
+            holder.tvB.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemC().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemC().isEmpty()) {
+            holder.layoutC.setVisibility(View.VISIBLE);
+            holder.tvC.setText("C." + ContextUtils.mPapers.get(position).getItemC());
+        } else {
             holder.layoutC.setVisibility(View.GONE);
+            holder.tvC.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemD().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemD().isEmpty()) {
+            holder.layoutD.setVisibility(View.VISIBLE);
+            holder.tvD.setText("D." + ContextUtils.mPapers.get(position).getItemD());
+        } else {
             holder.layoutD.setVisibility(View.GONE);
+            holder.tvD.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemE().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemE().isEmpty()) {
+            holder.layoutE.setVisibility(View.VISIBLE);
+            holder.tvE.setText("E." + ContextUtils.mPapers.get(position).getItemE());
+        } else {
             holder.layoutE.setVisibility(View.GONE);
+            holder.tvE.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemF().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemF().isEmpty()) {
+            holder.layoutF.setVisibility(View.VISIBLE);
+            holder.tvF.setText("F." + ContextUtils.mPapers.get(position).getItemF());
+        } else {
             holder.layoutF.setVisibility(View.GONE);
+            holder.tvF.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemG().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemG().isEmpty()) {
+            holder.layoutG.setVisibility(View.VISIBLE);
+            holder.tvG.setText("G." + ContextUtils.mPapers.get(position).getItemG());
+        } else {
             holder.layoutG.setVisibility(View.GONE);
+            holder.tvG.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemH().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemH().isEmpty()) {
+            holder.layoutH.setVisibility(View.VISIBLE);
+            holder.tvH.setText("H." + ContextUtils.mPapers.get(position).getItemH());
+        } else {
             holder.layoutH.setVisibility(View.GONE);
+            holder.tvH.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemI().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemI().isEmpty()) {
+            holder.layoutI.setVisibility(View.VISIBLE);
+            holder.tvI.setText("I." + ContextUtils.mPapers.get(position).getItemI());
+        } else {
             holder.layoutI.setVisibility(View.GONE);
+            holder.tvI.setText("");
         }
-        if (ContextUtils.mPapers.get(position).getItemJ().equals("")) {
+        if (!ContextUtils.mPapers.get(position).getItemJ().isEmpty()) {
+            holder.layoutJ.setVisibility(View.VISIBLE);
+            holder.tvJ.setText("J." + ContextUtils.mPapers.get(position).getItemJ());
+        } else {
             holder.layoutJ.setVisibility(View.GONE);
+            holder.tvJ.setText("");
         }
-
-        holder.tvA.setVisibility(View.VISIBLE);
-        holder.tvB.setVisibility(View.VISIBLE);
-        holder.tvC.setVisibility(View.VISIBLE);
-        holder.tvD.setVisibility(View.VISIBLE);
-        holder.tvE.setVisibility(View.VISIBLE);
-        holder.tvF.setVisibility(View.VISIBLE);
-        holder.tvG.setVisibility(View.VISIBLE);
-        holder.tvH.setVisibility(View.VISIBLE);
-        holder.tvI.setVisibility(View.VISIBLE);
-        holder.tvJ.setVisibility(View.VISIBLE);
-
-        holder.tvA.setText("A." + ContextUtils.mPapers.get(position).getItemA());
-        holder.tvB.setText("B." + ContextUtils.mPapers.get(position).getItemB());
-        holder.tvC.setText("C." + ContextUtils.mPapers.get(position).getItemC());
-        holder.tvD.setText("D." + ContextUtils.mPapers.get(position).getItemD());
-        holder.tvE.setText("E." + ContextUtils.mPapers.get(position).getItemE());
-        holder.tvE.setText("F." + ContextUtils.mPapers.get(position).getItemF());
-        holder.tvE.setText("G." + ContextUtils.mPapers.get(position).getItemG());
-        holder.tvE.setText("H." + ContextUtils.mPapers.get(position).getItemH());
-        holder.tvE.setText("I." + ContextUtils.mPapers.get(position).getItemI());
-        holder.tvE.setText("J." + ContextUtils.mPapers.get(position).getItemJ());
 
         String answer = ContextUtils.mPapers.get(position).getUserAnswer();
         if (!answer.isEmpty() && answer.length() > 0) {
@@ -187,13 +208,16 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
             holder.cbJ.setChecked(answer.contains("J"));
         }
 
+        if (!ContextUtils.mPapers.get(position).getAnli().isEmpty()) {
+            holder.questionAnli.setText(ContextUtils.mPapers.get(position).getAnli());
+        }
         final int eT = ContextUtils.mPapers.get(position).getExerciseType();
         if (eT == 1) {
-            holder.question.setText("(单选题)" + ContextUtils.mPapers.get(position).getQuestion());
+            holder.question.setText((position + 1) + ".(单选题)" + ContextUtils.mPapers.get(position).getQuestion());
         } else if (eT == 2) {
-            holder.question.setText("(多选题)" + ContextUtils.mPapers.get(position).getQuestion());
+            holder.question.setText((position + 1) + ".(多选题)" + ContextUtils.mPapers.get(position).getQuestion());
         } else if (eT == 3) {
-            holder.question.setText("(判断题)" + ContextUtils.mPapers.get(position).getQuestion());
+            holder.question.setText((position + 1) + ".(判断题)" + ContextUtils.mPapers.get(position).getQuestion());
         }
         holder.layoutA.setOnClickListener(new OnClickListener() {
             @Override
@@ -447,6 +471,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
     }
 
     private void SaveAndUpload() {
+        int cent = 0;
         List<UserAnswer> list = new ArrayList<>();
         DbManager db = new DbManager(mContext);
         db.openDB();
@@ -463,22 +488,33 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
             userAnswer.seq = paper.getSeq();
             userAnswer.testid = ContextUtils.testId;
             userAnswer.timuid = paper.getId();
+            if (userAnswer.isright > 0) {
+                cent += userAnswer.score;
+            }
             list.add(userAnswer);
         }
+        SimpleExam exam = new SimpleExam();
+        exam.setId(mExam.getId());
+        exam.setExamName(mExam.getTitle());
+        exam.setScore(cent);
+        exam.setJigeScore(mExam.getJiGeScore());
+        db.insertTest(exam);
+        result = cent + "(" + mExam.getJiGeScore() + ")";
         ContextUtils.mUserAnswers = list;
         db.closeDB();
         if (ContextUtils.mUserAnswers != null && ContextUtils.mUserAnswers.size() > 0) {
             new UploadDataThread().start();
+            new JJUdpUtils().start();
         }
     }
 
-    class LinearOnClickListener implements OnClickListener {
+    private class LinearOnClickListener implements OnClickListener {
         private int mPosition;
         private int mPosition1;
         private ViewHolder viewHolder;
         private int t;
 
-        public LinearOnClickListener(int position, int position1, ViewHolder viewHolder, int type) {
+        LinearOnClickListener(int position, int position1, ViewHolder viewHolder, int type) {
             mPosition = position;
             mPosition1 = position1;
             this.viewHolder = viewHolder;
@@ -494,6 +530,11 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
                 if (mPosition == -1) {
                     Toast.makeText(mContext, "已经是第一题", Toast.LENGTH_SHORT).show();
                 } else {
+                    Paper paper = ContextUtils.mPapers.get(mPosition1);
+                    if (paper.getN() == (1)) {
+                        viewHolder.questionBottom.setTextColor(ContextCompat.getColor(mContext, R.color.yellow));
+                    } else
+                        viewHolder.questionBottom.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
                     mContext.setCurrentView(mPosition);
                 }
             }
@@ -513,8 +554,10 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
     }
 
     public class ViewHolder {
+        TextView questionAnli;
         TextView questionType;
         TextView question;
+        TextView questionBottom;
         LinearLayout previousBtn, nextBtn, totalBtn, questionBtn;
         TextView nextText;
         TextView totalText;
@@ -558,7 +601,8 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
             switch (msg.what) {
                 case 1:
                     Toast.makeText(mContext, "交卷成功", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(mContext, MainActivity.class);
+                    Intent intent = new Intent(mContext, ExamResultActivity.class);
+                    intent.putExtra("result", result);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);//设置不要刷新将要跳转的界面
                     mContext.startActivity(intent);
@@ -627,8 +671,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         public void run() {
             try {
                 if (ContextUtils.isLogin) {
-                    ExamModel.UploadPaper(mContext);
-                    new JJUdpUtils().start();
+                    ExamModel.UploadPaper(mContext, 1);
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -638,7 +681,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         }
     }
 
-    class JJUdpUtils extends Thread {
+    private class JJUdpUtils extends Thread {
         @Override
         public void run() {
             try {
@@ -654,11 +697,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
                 DatagramSocket socket = new DatagramSocket();
                 socket.send(packet);
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
         }

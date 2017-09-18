@@ -107,7 +107,6 @@
                 <!-- 下圆角-->
                 <LinearLayout style="@style/bottom_layout"
                               android:id="@+id/about_us_layout">
-
                     <TextView
                         style="@style/user_text"
                         android:text="关于"/>

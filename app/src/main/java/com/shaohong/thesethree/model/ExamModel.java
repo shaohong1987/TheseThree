@@ -4,7 +4,9 @@ import android.content.Context;
 
 import com.shaohong.thesethree.bean.Exam;
 import com.shaohong.thesethree.bean.Paper;
+import com.shaohong.thesethree.bean.SimpleExam;
 import com.shaohong.thesethree.bean.UserAnswer;
+import com.shaohong.thesethree.database.DbManager;
 import com.shaohong.thesethree.utils.ConstantUtils;
 import com.shaohong.thesethree.utils.ContextUtils;
 import com.shaohong.thesethree.utils.SharedPreferencesHelper;
@@ -47,7 +49,7 @@ public class ExamModel {
                 .url(ConstantUtils.REQUEST_URL+"getTests")
                 .post(formBody)
                 .build();
-        Response response = null;
+        Response response;
         try {
             response = client.newCall(request).execute();
             if (response.isSuccessful()) {
@@ -65,8 +67,8 @@ public class ExamModel {
                             exam.setFanWei(lan.getString("fanwei"));
                             exam.setFen(lan.getInt("fen"));
                             exam.setGroupId(lan.getInt("groupid"));
-                            exam.setGroupName(lan.getString("groupname"));;
-                            exam.setHosId(lan.getInt("hosid"));;
+                            exam.setGroupName(lan.getString("groupname"));
+                            exam.setHosId(lan.getInt("hosid"));
                             exam.setId(lan.getInt("id"));
                             exam.setEnd(lan.getInt("isend")>0);
                             exam.setJiGeScore(lan.getInt("jigescore"));
@@ -79,9 +81,7 @@ public class ExamModel {
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
         return exams;
@@ -111,9 +111,7 @@ public class ExamModel {
                     result.put("zql",obj.getString("zql"));
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
         return result;
@@ -132,7 +130,7 @@ public class ExamModel {
                 .url(ConstantUtils.REQUEST_URL+"getjk")
                 .post(formBody)
                 .build();
-        Response response = null;
+        Response response;
         try {
             response = client.newCall(request).execute();
             if (response.isSuccessful()) {
@@ -143,9 +141,7 @@ public class ExamModel {
                     result.put("isend",obj.getString("isend"));
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
         return result;
@@ -175,26 +171,26 @@ public class ExamModel {
         return false;
     }
 
-    public static List<Paper> DownloadPaper(int testid){
-        List<Paper> papers=null;
+    public static List<Paper> DownloadPaper(int testid) {
+        List<Paper> papers = null;
         OkHttpClient client = new OkHttpClient();
         RequestBody formBody = new FormBody.Builder()
-                .add("testId",String.valueOf(testid))
+                .add("testId", String.valueOf(testid))
                 .build();
         Request request = new Request.Builder()
-                .url(ConstantUtils.REQUEST_URL+"tbtimu")
+                .url(ConstantUtils.REQUEST_URL + "tbtimu")
                 .post(formBody)
                 .build();
-        Response response = null;
+        Response response;
         try {
             response = client.newCall(request).execute();
             if (response.isSuccessful()) {
                 String res = response.body().string();
                 if (!res.isEmpty()) {
-                    papers=new ArrayList<>();
-                    JSONObject obj=new JSONObject(res);
-                    if(obj.getString("result").equals("true")){
-                        JSONArray jsonArray=obj.getJSONArray("data");
+                    papers = new ArrayList<>();
+                    JSONObject obj = new JSONObject(res);
+                    if (obj.getString("result").equals("true")) {
+                        JSONArray jsonArray = obj.getJSONArray("data");
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject lan = jsonArray.getJSONObject(i);
                             Paper paper = new Paper();
@@ -231,15 +227,42 @@ public class ExamModel {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
-        }catch (JSONException e) {
-            e.printStackTrace();
+        }
+        if (papers != null && papers.size() > 0) {
+            List<Paper> p1 = new ArrayList<>();//判断
+            List<Paper> p2 = new ArrayList<>();//单选
+            List<Paper> p3 = new ArrayList<>();//多选
+            List<Paper> p4 = new ArrayList<>();//案例
+            for (int i = 0; i < papers.size(); i++) {
+                Paper p = papers.get(i);
+                if (!p.getAnli().isEmpty()) {
+                    p4.add(p);
+                } else {
+                    switch (p.getExerciseType()) {
+                        case 1:
+                            p1.add(p);
+                            break;
+                        case 2:
+                            p2.add(p);
+                            break;
+                        case 3:
+                            p3.add(p);
+                            break;
+                    }
+                }
+            }
+            papers.clear();
+            papers.addAll(p1);
+            papers.addAll(p2);
+            papers.addAll(p3);
+            papers.addAll(p4);
         }
         return papers;
     }
 
-    public static boolean UploadPaper(Context context){
+    public static boolean UploadPaper(Context context, int type) {
         List<UserAnswer> userAnswers= ContextUtils.mUserAnswers;
         SharedPreferencesHelper sharedPreferencesHelper=new SharedPreferencesHelper(context);
         int userid=(int)sharedPreferencesHelper.get("userid",-1);
@@ -270,12 +293,13 @@ public class ExamModel {
                 .add("data",data)
                 .add("userid",String.valueOf(userid))
                 .add("testid",String.valueOf(testid))
+                .add("type", String.valueOf(type))
                 .build();
         Request request = new Request.Builder()
                 .url(ConstantUtils.REQUEST_URL+"jiaojuan")
                 .post(formBody)
                 .build();
-        Response response = null;
+        Response response;
         try {
             response = client.newCall(request).execute();
             if (response.isSuccessful()) {
@@ -308,11 +332,39 @@ public class ExamModel {
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static boolean SetChongKao(int userid, int testid) {
+        OkHttpClient client = new OkHttpClient();
+        RequestBody formBody = new FormBody.Builder()
+                .add("testid", String.valueOf(testid))
+                .add("userid", String.valueOf(userid))
+                .build();
+        Request request = new Request.Builder()
+                .url(ConstantUtils.REQUEST_URL + "unjiaojuan")
+                .post(formBody)
+                .build();
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            if (response.isSuccessful()) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static List<SimpleExam> GetSimpleExamList(Context context) {
+        DbManager dbManager = new DbManager(context);
+        dbManager.openDB();
+        List<SimpleExam> list = dbManager.getExams();
+        dbManager.closeDB();
+        return list;
     }
 }

@@ -21,9 +21,9 @@ import java.util.HashMap;
 public class ExamFragment extends BaseFragment {
 
     private HashMap<String, String> data;
-    private TextView xfTextView;
-    private TextView ccTextView;
-    private TextView zqlTextView;
+    private TextView xfTextView;//近期待参加考试数量
+    private TextView ccTextView;//已参加考试数量
+    private TextView zqlTextView;//及格率
 
     private Handler handler = new Handler() {
         @Override
@@ -39,7 +39,6 @@ public class ExamFragment extends BaseFragment {
                         if (data.containsKey("zql"))
                             zqlTextView.setText(data.get("zql"));
                     }
-
                     break;
             }
         }

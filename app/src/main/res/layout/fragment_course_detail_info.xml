@@ -4,10 +4,9 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="@color/colorLightGray">
-
     <ListView
         android:id="@+id/kj_course_detail_list_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
     </ListView>
 </LinearLayout>

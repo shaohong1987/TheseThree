@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/small_margin"
+              android:orientation="horizontal">
+
+    <ImageView
+        android:layout_margin="@dimen/medium_font_size"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/user_image"/>
+
+    <LinearLayout
+        android:layout_weight="1"
+        android:layout_margin="@dimen/small_font_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/discus_username_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="东迎"
+            android:textColor="@color/lightblue"
+            android:textSize="@dimen/small_font_size"/>
+
+        <TextView
+            android:layout_marginTop="@dimen/small_margin"
+            android:textSize="@dimen/medium_font_size"
+            android:id="@+id/discus_content_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="aaa"/>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/small_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:textSize="@dimen/small_font_size"
+                android:layout_marginTop="@dimen/small_margin"
+                android:id="@+id/discus_time_text_view"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="09-12 17:08"/>
+
+            <ImageButton
+                android:id="@+id/discus_reply_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/reply"/>
+        </LinearLayout>
+
+        <com.shaohong.thesethree.myview.ListViewForRecyclerView
+            android:id="@+id/discus_replys_content_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/lightblue">
+        </com.shaohong.thesethree.myview.ListViewForRecyclerView>
+    </LinearLayout>
+</LinearLayout>

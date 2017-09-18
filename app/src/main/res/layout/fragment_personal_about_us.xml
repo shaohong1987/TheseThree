@@ -4,10 +4,12 @@
              android:layout_height="match_parent"
              tools:context="com.shaohong.thesethree.modules.personal.AboutUsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="关于我们"/>
+        android:id="@+id/version_name_personal_about_us"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="当前版本"
+        android:textSize="@dimen/large_font_size"/>
 
 </FrameLayout>

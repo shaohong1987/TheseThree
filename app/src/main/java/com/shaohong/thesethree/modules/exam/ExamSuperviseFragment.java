@@ -5,12 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.PermissionChecker;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -155,7 +153,6 @@ public class ExamSuperviseFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    Toast.makeText(getContext(), bundle.get("data").toString(), Toast.LENGTH_LONG).show();
                     break;
                 case 1011:
                     seconds+=1;
@@ -168,6 +165,13 @@ public class ExamSuperviseFragment extends Fragment {
                     mYJJAdapter.notifyDataSetChanged();
                     mWJJAdapter.notifyDataSetChanged();
                     statistic_jiankao_text_view.setText(mString);
+                    break;
+                case 1234:
+                    Toast.makeText(getContext(), "已允许 " + mKaoSheng.userName + " 重新考试", Toast.LENGTH_SHORT).show();
+                    break;
+                case 1235:
+                    Toast.makeText(getContext(), "操作失败，未能允许 " + mKaoSheng.userName + " 重新考试", Toast.LENGTH_SHORT)
+                            .show();
                     break;
             }
         }
@@ -292,43 +296,13 @@ public class ExamSuperviseFragment extends Fragment {
                     message.setData(bundle);
                     handler.sendMessage(message);
                 }
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
         }
     }
 
     class JiaoJuanThread extends Thread {
-        @Override
-        public void run() {
-            try {
-                InetAddress address = InetAddress.getByName(ConstantUtils.UDP_SERVER_URL);
-                JSONObject object = new JSONObject();
-                object.put("type", 2);
-                object.put("code", 2);
-                object.put("usertype", 2);
-                object.put("testcode", mExam.getId());
-                object.put("userid", mKaoSheng.userId);
-                object.put("name", mKaoSheng.userName);
-                byte[] data = object.toString().getBytes();
-                DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
-                DatagramSocket socket = new DatagramSocket();
-                socket.send(packet);
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    class ChongKaoThread extends Thread {
         @Override
         public void run() {
             try {
@@ -351,6 +325,14 @@ public class ExamSuperviseFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    class ChongKaoThread extends Thread {
+        @Override
+        public void run() {
+            boolean result = ExamModel.SetChongKao(mKaoSheng.userId, mExam.getId());
+            handler.sendEmptyMessage(result ? 1234 : 1235);
         }
     }
 
@@ -455,11 +437,7 @@ public class ExamSuperviseFragment extends Fragment {
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
                 DatagramSocket socket = new DatagramSocket();
                 socket.send(packet);
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (JSONException | IOException e) {
                 e.printStackTrace();
             }
         }
@@ -481,11 +459,7 @@ public class ExamSuperviseFragment extends Fragment {
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
                 DatagramSocket socket = new DatagramSocket();
                 socket.send(packet);
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (JSONException | IOException e) {
                 e.printStackTrace();
             }
         }

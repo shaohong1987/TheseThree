@@ -36,7 +36,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Timer;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -118,7 +117,7 @@ public class ExamEnterFragment extends Fragment {
         TextView eName = (TextView) view.findViewById(R.id.name_exam_text_view);
         eName.setText("名称：" + mExam.getTitle());
         TextView eTime = (TextView) view.findViewById(R.id.time_exam_text_view);
-        eTime.setText("时间：" + mExam.getStartTime());
+        eTime.setText("时间：" + mExam.getStartTime().substring(0, mExam.getStartTime().length() - 3));
         TextView eAddress = (TextView) view.findViewById(R.id.address_exam_text_view);
         eAddress.setText("地点：" + mExam.getAddress());
         //考生信息
@@ -156,6 +155,8 @@ public class ExamEnterFragment extends Fragment {
                         .show();
             }
         }
+//        new LoadDataThread().start();
+//        new QdUdpUtils().start();
     }
 
     private void initTimer() throws ParseException {

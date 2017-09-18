@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.shaohong.thesethree.modules.course.CourseDetailIMFragment;
 import com.shaohong.thesethree.modules.course.CourseDetailInfoFragment;
 import com.shaohong.thesethree.utils.ConstantUtils;
 
@@ -20,9 +21,16 @@ public class CourseDetailPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        CourseDetailInfoFragment courseOptionFragment=new CourseDetailInfoFragment();
-        courseOptionFragment.courseId=courseId;
-        return courseOptionFragment;
+        if (position == 0) {
+            CourseDetailInfoFragment courseOptionFragment = new CourseDetailInfoFragment();
+            courseOptionFragment.courseId = courseId;
+            return courseOptionFragment;
+        } else {
+            CourseDetailIMFragment courseDetailIMFragment = new CourseDetailIMFragment();
+            courseDetailIMFragment.courseId = courseId;
+            return courseDetailIMFragment;
+        }
+
     }
 
     @Override
