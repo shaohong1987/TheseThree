@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,12 +55,13 @@ public class ExamSuperviseFragment extends Fragment {
     private YJJAdapter mYJJAdapter;
     private WJJAdapter mWJJAdapter;
     private KaoSheng mKaoSheng;
-    private int seconds=0;
+    private int seconds = 0;
     Thread mThread;
-    private boolean flag=true;
-    private String mString="";
+    private boolean flag = true;
+    private String mString = "";
     private int yd;
     private int qj;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +75,7 @@ public class ExamSuperviseFragment extends Fragment {
         Bundle bundle = getArguments();
         mExam = (Exam) bundle.get(ConstantUtils.EXAM_INFO);
         djs_text_view = (TextView) view.findViewById(R.id.djs_jiankao_text_view);
-        statistic_jiankao_text_view= (TextView) view.findViewById(R.id.statistic_jiankao_text_view);
+        statistic_jiankao_text_view = (TextView) view.findViewById(R.id.statistic_jiankao_text_view);
         statistic_jiankao_text_view.setText(mString);
         control_exam_button = (Button) view.findViewById(R.id.control_jiankao_button);
         if (mExam.getType() == 1) {
@@ -85,10 +85,10 @@ public class ExamSuperviseFragment extends Fragment {
                     if (control_exam_button.getText().equals("开始考试")) {
                         new StartThread().start();
                         control_exam_button.setText("结束考试");
-                        mThread=new Thread(new MyThread());
+                        mThread = new Thread(new MyThread());
                         mThread.start();
                     } else if (control_exam_button.getText().equals("结束考试")) {
-                        flag=false;
+                        flag = false;
                         new EndThread().start();
                         control_exam_button.setText("已结束");
                     }
@@ -101,15 +101,15 @@ public class ExamSuperviseFragment extends Fragment {
         yJJList = new ArrayList<>();
         wJJList = new ArrayList<>();
         userInfo = UserModel.getUserInfoMore(getContext());
-        generateBarCode(view, String.valueOf(mExam.getId()));
         MyGridView yJJgridView = (MyGridView) view.findViewById(R.id.yi_jiao_juan_grid_view);
         mYJJAdapter = new YJJAdapter(getContext(), yJJList);
         yJJgridView.setAdapter(mYJJAdapter);
-        MyGridView WJJgridView = (MyGridView) view.findViewById(R.id.wei_jiao_juan_grid_view);
+        MyGridView WJJaridView = (MyGridView) view.findViewById(R.id.wei_jiao_juan_grid_view);
         mWJJAdapter = new WJJAdapter(getContext(), wJJList);
-        WJJgridView.setAdapter(mWJJAdapter);
+        WJJaridView.setAdapter(mWJJAdapter);
         new GetKaoShengThread().start();
         new JianKaoThread().start();
+        generateBarCode(view, String.valueOf(mExam.getId()));
         return view;
     }
 
@@ -126,7 +126,7 @@ public class ExamSuperviseFragment extends Fragment {
             switch (msg.what) {
                 case 1:
                     Bundle bundle = msg.getData();
-                    String result = bundle.get("data").toString();
+                    String result = (String) bundle.get("data");
                     try {
                         JSONObject object = new JSONObject(result);
                         KaoSheng kaoSheng = new KaoSheng();
@@ -148,18 +148,18 @@ public class ExamSuperviseFragment extends Fragment {
                             yJJList.add(kaoSheng);
                             mYJJAdapter.notifyDataSetChanged();
                         }
-                        mString="应到"+yd+"人，实到"+(yJJList.size()+wJJList.size())+"人，请假"+qj+"人";
+                        mString = "应到" + yd + "人，实到" + (yJJList.size() + wJJList.size()) + "人，请假" + qj + "人";
                         statistic_jiankao_text_view.setText(mString);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                     break;
                 case 1011:
-                    seconds+=1;
-                    int hour=seconds/(60*60);
-                    int min=(seconds-hour*60*60)/60;
-                    int sec=(seconds-hour*60*60-min*60);
-                    djs_text_view.setText(hour+"时"+min+"分"+sec+"秒");
+                    seconds += 1;
+                    int hour = seconds / (60 * 60);
+                    int min = (seconds - hour * 60 * 60) / 60;
+                    int sec = (seconds - hour * 60 * 60 - min * 60);
+                    djs_text_view.setText(hour + "时" + min + "分" + sec + "秒");
                     break;
                 case 1212:
                     mYJJAdapter.notifyDataSetChanged();
@@ -229,46 +229,52 @@ public class ExamSuperviseFragment extends Fragment {
         builder.show();
     }
 
-    class GetKaoShengThread extends Thread{
+    @Override
+    public void onResume() {
+        super.onResume();
+        yJJList.clear();
+        wJJList.clear();
+        new GetKaoShengThread().start();
+    }
+
+    private class GetKaoShengThread extends Thread {
         @Override
         public void run() {
             try {
                 if (ContextUtils.isLogin) {
-                    String data=ExamModel.GetKaoSheng(mExam.getId());
-                    if(data!=null){
-                        JSONObject obj=new JSONObject(data);
-                        yd=obj.getInt("yingdao");
-                        qj=obj.getInt("qingjia");
-                        JSONArray ek=obj.getJSONArray("endks");
-                        for (int i=0;i<ek.length();i++){
-                            JSONObject o=ek.getJSONObject(i);
-                            KaoSheng kaoSheng=new KaoSheng();
-                            kaoSheng.userName=o.getString("name");
-                            kaoSheng.userId=o.getInt("userid");
+                    String data = ExamModel.GetKaoSheng(mExam.getId());
+                    if (data != null) {
+                        JSONObject obj = new JSONObject(data);
+                        yd = obj.getInt("yingdao");
+                        qj = obj.getInt("qingjia");
+                        JSONArray ek = obj.getJSONArray("endks");
+                        for (int i = 0; i < ek.length(); i++) {
+                            JSONObject o = ek.getJSONObject(i);
+                            KaoSheng kaoSheng = new KaoSheng();
+                            kaoSheng.userName = o.getString("name");
+                            kaoSheng.userId = o.getInt("userid");
                             yJJList.add(kaoSheng);
                         }
-                        JSONArray ok=obj.getJSONArray("onks");
-                        for (int i=0;i<ok.length();i++) {
+                        JSONArray ok = obj.getJSONArray("onks");
+                        for (int i = 0; i < ok.length(); i++) {
                             JSONObject o = ek.getJSONObject(i);
                             KaoSheng kaoSheng = new KaoSheng();
                             kaoSheng.userName = o.getString("name");
                             kaoSheng.userId = o.getInt("userid");
                             wJJList.add(kaoSheng);
                         }
-                        mString="应到"+yd+"人，实到"+(ok.length()+ek.length())+"人，请假"+qj+"人";
+                        mString = "应到" + yd + "人，实到" + (ok.length() + ek.length()) + "人，请假" + qj + "人";
                         handler.sendEmptyMessage(1212);
                     }
                 }
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+                Thread.sleep(100);
+            } catch (InterruptedException | JSONException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    class JianKaoThread extends Thread {
+    private class JianKaoThread extends Thread {
         @Override
         public void run() {
             try {
@@ -302,7 +308,7 @@ public class ExamSuperviseFragment extends Fragment {
         }
     }
 
-    class JiaoJuanThread extends Thread {
+    private class JiaoJuanThread extends Thread {
         @Override
         public void run() {
             try {
@@ -318,17 +324,13 @@ public class ExamSuperviseFragment extends Fragment {
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
                 DatagramSocket socket = new DatagramSocket();
                 socket.send(packet);
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    class ChongKaoThread extends Thread {
+    private class ChongKaoThread extends Thread {
         @Override
         public void run() {
             boolean result = ExamModel.SetChongKao(mKaoSheng.userId, mExam.getId());
@@ -336,11 +338,11 @@ public class ExamSuperviseFragment extends Fragment {
         }
     }
 
-    class YJJAdapter extends BaseAdapter {
+    private class YJJAdapter extends BaseAdapter {
         private List<KaoSheng> data;
         private LayoutInflater layoutInflater;
 
-        public YJJAdapter(Context context, List<KaoSheng> kaoShengs) {
+        YJJAdapter(Context context, List<KaoSheng> kaoShengs) {
             layoutInflater = LayoutInflater.from(context);
             data = kaoShengs;
         }
@@ -378,11 +380,11 @@ public class ExamSuperviseFragment extends Fragment {
         }
     }
 
-    class WJJAdapter extends BaseAdapter {
+    private class WJJAdapter extends BaseAdapter {
         private List<KaoSheng> data;
         private LayoutInflater layoutInflater;
 
-        public WJJAdapter(Context context, List<KaoSheng> kaoShengs) {
+        WJJAdapter(Context context, List<KaoSheng> kaoShengs) {
             layoutInflater = LayoutInflater.from(context);
             data = kaoShengs;
         }
@@ -421,7 +423,7 @@ public class ExamSuperviseFragment extends Fragment {
         }
     }
 
-    class StartThread extends Thread {
+    private class StartThread extends Thread {
         @Override
         public void run() {
             try {
@@ -443,7 +445,7 @@ public class ExamSuperviseFragment extends Fragment {
         }
     }
 
-    class EndThread extends Thread {
+    private class EndThread extends Thread {
         @Override
         public void run() {
             try {
@@ -465,16 +467,16 @@ public class ExamSuperviseFragment extends Fragment {
         }
     }
 
-    class MyThread implements Runnable {      // thread
+    private class MyThread implements Runnable {      // thread
         @Override
         public void run() {
             while (flag) {
                 try {
-                    Thread.sleep(1000);     // sleep 1000ms
+                    Thread.sleep(100);     // sleep 1000ms
                     Message message = new Message();
                     message.what = 1011;
                     handler.sendMessage(message);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }

@@ -20,7 +20,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class PersonalFragment extends BaseFragment implements View.OnClickListener{
+public class PersonalFragment extends BaseFragment implements View.OnClickListener {
 
     @BindView(R.id.login_in_button)
     Button login_in_button;
@@ -50,6 +50,7 @@ public class PersonalFragment extends BaseFragment implements View.OnClickListen
         ButterKnife.bind(this, view);
         isLogin();
 
+        login_out_button.setVisibility(View.GONE);
         //登录
         login_in_button.setOnClickListener(this);
         //登出
@@ -71,7 +72,7 @@ public class PersonalFragment extends BaseFragment implements View.OnClickListen
     private void isLogin() {
 
         if (ContextUtils.isLogin) {
-            login_out_button.setVisibility(View.VISIBLE);
+            login_out_button.setVisibility(View.GONE);
             login_in_button.setVisibility(View.GONE);
             personal_info_menu_layout.setVisibility(View.VISIBLE);
             user_info_text_view.setVisibility(View.VISIBLE);
@@ -95,10 +96,10 @@ public class PersonalFragment extends BaseFragment implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-        Intent intent=null;
-        switch (v.getId()){
+        Intent intent = null;
+        switch (v.getId()) {
             case R.id.login_in_button:
-                 intent= new Intent(getActivity(), LoginActivity.class);
+                intent = new Intent(getActivity(), LoginActivity.class);
                 break;
             case R.id.login_out_button:
                 UserModel userModel = new UserModel();
@@ -106,30 +107,29 @@ public class PersonalFragment extends BaseFragment implements View.OnClickListen
                 isLogin();
                 break;
             case R.id.personal_info_layout:
-                intent= new Intent(getActivity(), CommonActivity.class);
-                intent.putExtra(ConstantUtils.COMMON_ARG,v.getId());
+                intent = new Intent(getActivity(), CommonActivity.class);
+                intent.putExtra(ConstantUtils.COMMON_ARG, v.getId());
                 break;
             case R.id.mistake_book_layout:
-                intent= new Intent(getActivity(), CommonActivity.class);
-                intent.putExtra(ConstantUtils.COMMON_ARG,v.getId());
+                intent = new Intent(getActivity(), CommonActivity.class);
+                intent.putExtra(ConstantUtils.COMMON_ARG, v.getId());
                 break;
             case R.id.help_feedback_layout:
-                intent= new Intent(getActivity(), CommonActivity.class);
-                intent.putExtra(ConstantUtils.COMMON_ARG,v.getId());
+                intent = new Intent(getActivity(), CommonActivity.class);
+                intent.putExtra(ConstantUtils.COMMON_ARG, v.getId());
                 break;
             case R.id.clear_cache_layout:
                 //再次实现清除缓存
                 break;
             case R.id.about_us_layout:
-                intent= new Intent(getActivity(), CommonActivity.class);
-                intent.putExtra(ConstantUtils.COMMON_ARG,v.getId());
+                intent = new Intent(getActivity(), CommonActivity.class);
+                intent.putExtra(ConstantUtils.COMMON_ARG, v.getId());
                 break;
             default:
-                intent=null;
+                intent = null;
                 break;
         }
-        if(intent!=null)
-        {
+        if (intent != null) {
             startActivity(intent);
         }
     }
