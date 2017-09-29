@@ -46,6 +46,48 @@ public class ExamEnterFragment extends Fragment {
     private Exam mExam;
     private HashMap<String, String> userInfo;
     private int status = 0;//0:未签到,1:签到失败,2:签到成功，下载试卷失败,3:下载试卷成功
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1:
+                    Toast.makeText(getContext(), "试卷下载完成", Toast.LENGTH_LONG).show();
+                    sign_button.setText("开始答题");
+                    break;
+                case 2:
+                    Toast.makeText(getContext(), "签到成功,开始下载试卷", Toast.LENGTH_LONG).show();
+                    sign_button.setText("下载试卷");
+                    break;
+                case -1:
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("提示")
+                            .setMessage("签到失败，请稍后再试!")
+                            .setPositiveButton("确定", null)
+                            .show();
+                    sign_button.setText("扫码签到");
+                    break;
+                case 0:
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("提示")
+                            .setMessage("下载试卷失败，请稍后再试!")
+                            .setPositiveButton("确定", null)
+                            .show();
+                    sign_button.setText("下载试卷");
+                    break;
+                case 10:
+                    //解析数据，如果是开始考试，或是其他
+                    Bundle bundle = msg.getData();
+                    String result = bundle.getString("data");
+                    if (result.equals("endTest")) {
+                        sign_button.setText("扫码签到");
+                        sign_button.setVisibility(View.GONE);
+                        Toast.makeText(getContext(), "该考试已被管理员结束", Toast.LENGTH_LONG).show();
+                    }
+                    break;
+            }
+        }
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,22 +109,22 @@ public class ExamEnterFragment extends Fragment {
                 String arg = ((Button) v).getText().toString();
                 String t = timer_text_view.getText().toString();
                 if (arg.equals("开始答题")) {
-                    if(mExam.getType()==0){
+                    if (mExam.getType() == 0) {
                         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         try {
                             Date d1 = df.parse(mExam.getStartTime());
                             Date d2 = new Date();
                             long diff = d1.getTime() - d2.getTime();
-                            if(diff>0){
-                                Toast.makeText(getContext(),"考试未开始",Toast.LENGTH_LONG).show();
-                            }else{
+                            if (diff > 0) {
+                                Toast.makeText(getContext(), "考试未开始", Toast.LENGTH_LONG).show();
+                            } else {
                                 new LoadDataThread().start();
                             }
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
 
-                    }else{
+                    } else {
                         //去判断考试状态，应该调用接口
                     }
                 }
@@ -92,6 +134,15 @@ public class ExamEnterFragment extends Fragment {
                     startActivity(intent);
                 }
                 if (arg.equals("扫码签到")) {
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        if (format.parse(mExam.getEndTime()).getTime() <= new Date().getTime()) {
+                            Toast.makeText(getContext(), "考试已结束", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                     Intent intent = new Intent(getActivity(), CaptureActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     Bundle bundle = new Bundle();
@@ -100,7 +151,8 @@ public class ExamEnterFragment extends Fragment {
                     bundle.putBoolean(CaptureActivity.KEY_NEED_EXPOSURE, CaptureActivity.VALUE_NO_EXPOSURE);
                     bundle.putByte(CaptureActivity.KEY_FLASHLIGHT_MODE, CaptureActivity.VALUE_FLASHLIGHT_OFF);
                     bundle.putByte(CaptureActivity.KEY_ORIENTATION_MODE, CaptureActivity.VALUE_ORIENTATION_AUTO);
-                    bundle.putBoolean(CaptureActivity.KEY_SCAN_AREA_FULL_SCREEN, CaptureActivity.VALUE_SCAN_AREA_FULL_SCREEN);
+                    bundle.putBoolean(CaptureActivity.KEY_SCAN_AREA_FULL_SCREEN, CaptureActivity
+                            .VALUE_SCAN_AREA_FULL_SCREEN);
                     bundle.putBoolean(CaptureActivity.KEY_NEED_SCAN_HINT_TEXT, CaptureActivity.VALUE_SCAN_HINT_TEXT);
                     intent.putExtra(CaptureActivity.EXTRA_SETTING_BUNDLE, bundle);
                     startActivityForResult(intent, CaptureActivity.REQ_CODE);
@@ -137,26 +189,25 @@ public class ExamEnterFragment extends Fragment {
         return view;
     }
 
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            Bundle bundle = data.getExtras();
-            String scanResult = (String) bundle.get("SCAN_RESULT");
-            if (String.valueOf(mExam.getId()).equals(scanResult)) {
-                new LoadDataThread().start();
-                new QdUdpUtils().start();
-            } else {
-                new AlertDialog.Builder(getContext())
-                        .setTitle("提示")
-                        .setMessage("签到失败，请确认是否进错考场!")
-                        .setPositiveButton("确定", null)
-                        .show();
-            }
-        }
-//        new LoadDataThread().start();
-//        new QdUdpUtils().start();
+//        if (resultCode == RESULT_OK) {
+//            Bundle bundle = data.getExtras();
+//            String scanResult = (String) bundle.get("SCAN_RESULT");
+//            if (String.valueOf(mExam.getId()).equals(scanResult)) {
+//                new LoadDataThread().start();
+//                new QdUdpUtils().start();
+//            } else {
+//                new AlertDialog.Builder(getContext())
+//                        .setTitle("提示")
+//                        .setMessage("签到失败，请确认是否进错考场!")
+//                        .setPositiveButton("确定", null)
+//                        .show();
+//            }
+//        }
+        new LoadDataThread().start();
+        new QdUdpUtils().start();
     }
 
     private void initTimer() throws ParseException {
@@ -203,49 +254,6 @@ public class ExamEnterFragment extends Fragment {
         }
     }
 
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case 1:
-                    Toast.makeText(getContext(), "试卷下载完成", Toast.LENGTH_LONG).show();
-                    sign_button.setText("开始答题");
-                    break;
-                case 2:
-                    Toast.makeText(getContext(), "签到成功,开始下载试卷", Toast.LENGTH_LONG).show();
-                    sign_button.setText("下载试卷");
-                    break;
-                case -1:
-                    new AlertDialog.Builder(getContext())
-                            .setTitle("提示")
-                            .setMessage("签到失败，请稍后再试!")
-                            .setPositiveButton("确定", null)
-                            .show();
-                    sign_button.setText("扫码签到");
-                    break;
-                case 0:
-                    new AlertDialog.Builder(getContext())
-                            .setTitle("提示")
-                            .setMessage("下载试卷失败，请稍后再试!")
-                            .setPositiveButton("确定", null)
-                            .show();
-                    sign_button.setText("下载试卷");
-                    break;
-                case 10:
-                    //解析数据，如果是开始考试，或是其他
-                    Bundle bundle=msg.getData();
-                    String result=bundle.getString("data");
-                    if(result.equals("endTest")){
-                        sign_button.setText("扫码签到");
-                        sign_button.setVisibility(View.GONE);
-                        Toast.makeText(getContext(),"该考试已被管理员结束",Toast.LENGTH_LONG).show();
-                    }
-                    break;
-            }
-        }
-    };
-
     class LoadDataThread extends Thread {
         @Override
         public void run() {
@@ -289,7 +297,7 @@ public class ExamEnterFragment extends Fragment {
                 object.put("type", 1);
                 object.put("code", 2);
                 object.put("usertype", 1);
-                object.put("testcode",mExam.getId());
+                object.put("testcode", mExam.getId());
                 object.put("userid", userInfo.get("userid"));
                 object.put("name", userInfo.get("name"));
                 byte[] data = object.toString().getBytes();

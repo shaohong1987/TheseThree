@@ -92,7 +92,7 @@ public class HomeModel {
                         HistoryListItemObject commonData = new HistoryListItemObject();
                         commonData.setTitle(lan.getString("content"));
                         commonData.setDt(lan.getString("sendtime"));
-                        commonData.setType(lan.getInt("type")>1?"考试通知":"培训通知");
+                        commonData.setType(lan.getInt("type") == 1 ? "考试通知" : "培训通知");
                         commonData.setStatus("未确认");
                         commonData.setEducode(lan.getString("educode"));
                         commonData.setTestcode(lan.getString("testcode"));

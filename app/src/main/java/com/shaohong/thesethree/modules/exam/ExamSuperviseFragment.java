@@ -40,10 +40,12 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static com.shaohong.thesethree.R.id.barcode_enter_exam;
 
 public class ExamSuperviseFragment extends Fragment {
+    Thread mThread;
     private HashMap<String, String> userInfo;
     private Exam mExam;
     private TextView djs_text_view;
@@ -56,11 +58,95 @@ public class ExamSuperviseFragment extends Fragment {
     private WJJAdapter mWJJAdapter;
     private KaoSheng mKaoSheng;
     private int seconds = 0;
-    Thread mThread;
     private boolean flag = true;
     private String mString = "";
     private int yd;
     private int qj;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1:
+                    Bundle bundle = msg.getData();
+                    String result = (String) bundle.get("data");
+                    try {
+                        boolean f = false;
+                        JSONObject object = new JSONObject(result);
+                        KaoSheng kaoSheng = new KaoSheng();
+                        kaoSheng.userName = object.getString("name");
+                        kaoSheng.code = object.getInt("code");
+                        kaoSheng.type = object.getInt("type");
+                        kaoSheng.userId = object.getInt("userid");
+                        kaoSheng.userType = object.getInt("usertype");
+                        kaoSheng.leiXing = object.getInt("leixing");
+                        if (kaoSheng.leiXing == 1) {
+                            for (int j = 0; j < wJJList.size(); j++) {
+                                KaoSheng ks = wJJList.get(j);
+                                if (ks.userName.equals(kaoSheng.userName)) {
+                                    f = true;
+                                    break;
+                                }
+                            }
+                            if (!f) {
+                                wJJList.add(kaoSheng);
+                                mWJJAdapter.notifyDataSetChanged();
+                            }
+                        }
+                        if (kaoSheng.leiXing == 2) {
+                            f = false;
+                            for (int i = 0; i < wJJList.size(); i++) {
+                                KaoSheng ks = wJJList.get(i);
+                                if (ks.userName.equals(kaoSheng.userName)) {
+                                    f = true;
+                                    break;
+                                }
+                            }
+                            if (!f) {
+                                wJJList.remove(kaoSheng);
+                                mWJJAdapter.notifyDataSetChanged();
+                            }
+                            f = false;
+                            for (int i = 0; i < yJJList.size(); i++) {
+                                KaoSheng ks = yJJList.get(i);
+                                if (ks.userName.equals(kaoSheng.userName)) {
+                                    f = true;
+                                    break;
+                                }
+                            }
+                            if (!f) {
+                                yJJList.add(kaoSheng);
+                                mYJJAdapter.notifyDataSetChanged();
+                            }
+                        }
+                        mString = "应到" + yd + "人，实到" + (yJJList.size() + wJJList.size()) + "人，请假" + qj + "人";
+                        statistic_jiankao_text_view.setText(mString);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 1011:
+                    seconds += 1;
+                    int hour = seconds / (60 * 60);
+                    int min = (seconds - hour * 60 * 60) / 60;
+                    int sec = (seconds - hour * 60 * 60 - min * 60);
+                    djs_text_view.setText(hour + "时" + min + "分" + sec + "秒");
+                    break;
+                case 1212:
+                    mYJJAdapter.notifyDataSetChanged();
+                    mWJJAdapter.notifyDataSetChanged();
+                    statistic_jiankao_text_view.setText(mString);
+                    break;
+                case 1234:
+                    Toast.makeText(getContext(), "已允许 " + mKaoSheng.userName + " 重新考试", Toast.LENGTH_SHORT).show();
+                    break;
+                case 1235:
+                    Toast.makeText(getContext(), "操作失败，未能允许 " + mKaoSheng.userName + " 重新考试", Toast.LENGTH_SHORT)
+                            .show();
+                    break;
+            }
+        }
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -118,64 +204,6 @@ public class ExamSuperviseFragment extends Fragment {
         Bitmap qrBitmap = new BarCodeUtils().generateBitmap(content, 400, 400);
         imageView.setImageBitmap(qrBitmap);
     }
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case 1:
-                    Bundle bundle = msg.getData();
-                    String result = (String) bundle.get("data");
-                    try {
-                        JSONObject object = new JSONObject(result);
-                        KaoSheng kaoSheng = new KaoSheng();
-                        kaoSheng.userName = object.getString("name");
-                        kaoSheng.code = object.getInt("code");
-                        kaoSheng.type = object.getInt("type");
-                        kaoSheng.userId = object.getInt("userid");
-                        kaoSheng.userType = object.getInt("usertype");
-                        kaoSheng.leiXing = object.getInt("leixing");
-                        if (kaoSheng.leiXing == 1) {
-                            wJJList.add(kaoSheng);
-                            mWJJAdapter.notifyDataSetChanged();
-                        }
-                        if (kaoSheng.leiXing == 2) {
-                            if (wJJList.contains(kaoSheng)) {
-                                wJJList.remove(kaoSheng);
-                                mWJJAdapter.notifyDataSetChanged();
-                            }
-                            yJJList.add(kaoSheng);
-                            mYJJAdapter.notifyDataSetChanged();
-                        }
-                        mString = "应到" + yd + "人，实到" + (yJJList.size() + wJJList.size()) + "人，请假" + qj + "人";
-                        statistic_jiankao_text_view.setText(mString);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case 1011:
-                    seconds += 1;
-                    int hour = seconds / (60 * 60);
-                    int min = (seconds - hour * 60 * 60) / 60;
-                    int sec = (seconds - hour * 60 * 60 - min * 60);
-                    djs_text_view.setText(hour + "时" + min + "分" + sec + "秒");
-                    break;
-                case 1212:
-                    mYJJAdapter.notifyDataSetChanged();
-                    mWJJAdapter.notifyDataSetChanged();
-                    statistic_jiankao_text_view.setText(mString);
-                    break;
-                case 1234:
-                    Toast.makeText(getContext(), "已允许 " + mKaoSheng.userName + " 重新考试", Toast.LENGTH_SHORT).show();
-                    break;
-                case 1235:
-                    Toast.makeText(getContext(), "操作失败，未能允许 " + mKaoSheng.userName + " 重新考试", Toast.LENGTH_SHORT)
-                            .show();
-                    break;
-            }
-        }
-    };
 
     protected void showTimeOutDialog(final int type) {
         final Dialog builder = new Dialog(getContext(), R.style.dialog);
@@ -250,18 +278,38 @@ public class ExamSuperviseFragment extends Fragment {
                         JSONArray ek = obj.getJSONArray("endks");
                         for (int i = 0; i < ek.length(); i++) {
                             JSONObject o = ek.getJSONObject(i);
-                            KaoSheng kaoSheng = new KaoSheng();
-                            kaoSheng.userName = o.getString("name");
-                            kaoSheng.userId = o.getInt("userid");
-                            yJJList.add(kaoSheng);
+                            boolean f = false;
+                            for (int j = 0; j < yJJList.size(); j++) {
+                                KaoSheng ks = yJJList.get(j);
+                                if (ks.userName.equals(o.getString("name"))) {
+                                    f = true;
+                                    break;
+                                }
+                            }
+                            if (!f) {
+                                KaoSheng kaoSheng = new KaoSheng();
+                                kaoSheng.userName = o.getString("name");
+                                kaoSheng.userId = o.getInt("userid");
+                                yJJList.add(kaoSheng);
+                            }
                         }
                         JSONArray ok = obj.getJSONArray("onks");
                         for (int i = 0; i < ok.length(); i++) {
                             JSONObject o = ek.getJSONObject(i);
-                            KaoSheng kaoSheng = new KaoSheng();
-                            kaoSheng.userName = o.getString("name");
-                            kaoSheng.userId = o.getInt("userid");
-                            wJJList.add(kaoSheng);
+                            boolean f = false;
+                            for (int j = 0; j < wJJList.size(); j++) {
+                                KaoSheng ks = wJJList.get(j);
+                                if (ks.userName.equals(o.getString("name"))) {
+                                    f = true;
+                                    break;
+                                }
+                            }
+                            if (!f) {
+                                KaoSheng kaoSheng = new KaoSheng();
+                                kaoSheng.userName = o.getString("name");
+                                kaoSheng.userId = o.getInt("userid");
+                                wJJList.add(kaoSheng);
+                            }
                         }
                         mString = "应到" + yd + "人，实到" + (ok.length() + ek.length()) + "人，请假" + qj + "人";
                         handler.sendEmptyMessage(1212);
@@ -472,7 +520,7 @@ public class ExamSuperviseFragment extends Fragment {
         public void run() {
             while (flag) {
                 try {
-                    Thread.sleep(100);     // sleep 1000ms
+                    Thread.sleep(1000);     // sleep 1000ms
                     Message message = new Message();
                     message.what = 1011;
                     handler.sendMessage(message);

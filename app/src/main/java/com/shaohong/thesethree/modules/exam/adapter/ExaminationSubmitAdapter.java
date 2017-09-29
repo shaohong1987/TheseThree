@@ -1,6 +1,8 @@
 package com.shaohong.thesethree.modules.exam.adapter;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -12,6 +14,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -59,6 +62,22 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
     private Exam mExam;
     private HashMap<String, String> userInfo;
     private String result;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1:
+                    Toast.makeText(mContext, "交卷成功", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(mContext, ExamResultActivity.class);
+                    intent.putExtra("result", result);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);//设置不要刷新将要跳转的界面
+                    mContext.startActivity(intent);
+                    break;
+            }
+        }
+    };
 
     public ExaminationSubmitAdapter(ExamActivity context, List<View> viewItems, Exam exam) {
         mContext = context;
@@ -414,7 +433,7 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         holder.totalBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Save(holder, position,0);
+                Save(holder, position, 0);
                 View popupView = mContext.getLayoutInflater().inflate(R.layout.popupwindow, null);
                 PopupWindow window = new PopupWindow(popupView, RelativeLayout.LayoutParams.MATCH_PARENT,
                         RelativeLayout.LayoutParams.WRAP_CONTENT, true);
@@ -508,6 +527,18 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         }
     }
 
+    @Override
+    public int getCount() {
+        if (viewItems == null)
+            return 0;
+        return viewItems.size();
+    }
+
+    @Override
+    public boolean isViewFromObject(View arg0, Object arg1) {
+        return arg0 == arg1;
+    }
+
     private class LinearOnClickListener implements OnClickListener {
         private int mPosition;
         private int mPosition1;
@@ -525,7 +556,46 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         public void onClick(View v) {
             Save(viewHolder, mPosition1, t);
             if (mPosition == viewItems.size()) {
-                SaveAndUpload();
+                int record = 0;
+                //在此实现一个提示框
+                for (int i = 0; i < ContextUtils.mPapers.size(); i++) {
+                    Paper paper = ContextUtils.mPapers.get(i);
+                    if (paper.getUserAnswer() == null || "".equals(paper.getUserAnswer())) {
+                        record++;
+                    }
+                }
+                final Dialog builder = new Dialog(mContext, R.style.dialog);
+                builder.setContentView(R.layout.my_dialog);
+                TextView content = (TextView) builder.findViewById(R.id.dialog_content);
+                if (record > 0) {
+                    content.setText("您尚有" + record + "题未答，是否确认交卷？");
+                } else {
+                    content.setText("是否确认交卷？");
+                }
+                final Button confirm_btn = (Button) builder.findViewById(R.id.dialog_sure);
+                Button cancel_btn = (Button) builder.findViewById(R.id.dialog_cancle);
+                confirm_btn.setText("交卷");
+                cancel_btn.setText("继续答题");
+                confirm_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        SaveAndUpload();
+                    }
+                });
+                cancel_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        builder.dismiss();
+                    }
+                });
+                builder.setCanceledOnTouchOutside(false);
+                builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                        return false;
+                    }
+                });
+                builder.show();
             } else {
                 if (mPosition == -1) {
                     Toast.makeText(mContext, "已经是第一题", Toast.LENGTH_SHORT).show();
@@ -539,18 +609,6 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
                 }
             }
         }
-    }
-
-    @Override
-    public int getCount() {
-        if (viewItems == null)
-            return 0;
-        return viewItems.size();
-    }
-
-    @Override
-    public boolean isViewFromObject(View arg0, Object arg1) {
-        return arg0 == arg1;
     }
 
     public class ViewHolder {
@@ -593,23 +651,6 @@ public class ExaminationSubmitAdapter extends PagerAdapter {
         TextView tvI;
         TextView tvJ;
     }
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case 1:
-                    Toast.makeText(mContext, "交卷成功", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(mContext, ExamResultActivity.class);
-                    intent.putExtra("result", result);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);//设置不要刷新将要跳转的界面
-                    mContext.startActivity(intent);
-                    break;
-            }
-        }
-    };
 
     class MyAdapter extends BaseAdapter {
         private List<Paper> data;

@@ -13,6 +13,7 @@ import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,7 +41,6 @@ import java.lang.reflect.Field;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,10 +52,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class ExamActivity extends Activity {
-    private Date outTime;
-    private ImageView leftIv;
-    private TextView titleTv;
-    private TextView right;
     ExamViewPager viewPager;
     ExaminationSubmitAdapter pagerAdapter;
     List<View> viewItems = new ArrayList<>();
@@ -65,8 +61,10 @@ public class ExamActivity extends Activity {
     int minute = 0;
     int second = 0;
     int isFirst;
+    private Date outTime;
+    private TextView right;
     private HashMap<String, String> userInfo;
-    private boolean flag=true;
+    private boolean flag = true;
     private String result;
     private int type;
 
@@ -79,9 +77,9 @@ public class ExamActivity extends Activity {
             }
             if (minute == 0) {
                 if (second == 0) {
-                    isFirst+=1;
-                    if(isFirst==1){
-                        Toast.makeText(getApplicationContext(),"考试结束，正在进行自动交卷",Toast.LENGTH_SHORT).show();
+                    isFirst += 1;
+                    if (isFirst == 1) {
+                        Toast.makeText(getApplicationContext(), "考试结束，正在进行自动交卷", Toast.LENGTH_SHORT).show();
                         type = 1;
                         uploadExamination();
                     }
@@ -129,54 +127,88 @@ public class ExamActivity extends Activity {
             }
         }
     };
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1:
+                    Toast.makeText(getApplicationContext(), "交卷成功", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(getApplicationContext(), ExamResultActivity.class);
+                    intent.putExtra("result", result);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    break;
+                case 1011:
+                    second += 1;
+                    int hour = second / (60 * 60);
+                    int min = (second - hour * 60 * 60) / 60;
+                    int sec = (second - hour * 60 * 60 - min * 60);
+                    right.setText(hour + "时" + min + "分" + sec + "秒");
+                    break;
+                case 1012:
+                    Bundle bundle = msg.getData();
+                    String result = bundle.getString("data");
+                    //这边是否需要解析
+                    Toast.makeText(getApplicationContext(), "您已被监考官强制交卷", Toast.LENGTH_LONG).show();
+                    type = 3;
+                    uploadExamination();
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_exam);
-        Bundle bundle=getIntent().getExtras();
-        mExam= (Exam) bundle.get(ConstantUtils.EXAM_INFO);
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams
+                .FLAG_KEEP_SCREEN_ON);
+        Bundle bundle = getIntent().getExtras();
+        mExam = (Exam) bundle.get(ConstantUtils.EXAM_INFO);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
-            if(mExam.getType()==1){
+            if (mExam.getType() == 1) {
                 //正计时
                 new Thread(new MyThread()).start();
-            }else if(mExam.getType()==0){
+            } else if (mExam.getType() == 0) {
                 //倒计时
                 Date d1 = df.parse(mExam.getEndTime());
                 Date d2 = new Date();
                 long diff = d1.getTime() - d2.getTime();
-                if(diff<=0){
-                    Toast.makeText(getApplicationContext(),"该考试已结束",Toast.LENGTH_LONG).show();
+                if (diff <= 0) {
+                    Toast.makeText(getApplicationContext(), "该考试已结束", Toast.LENGTH_LONG).show();
                     finish();
                 }
                 long days = diff / (1000 * 60 * 60 * 24);
-                long hours = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60 * 60);
-                long min = (diff-days*(1000 * 60 * 60 * 24)-hours*(1000* 60 * 60))/(1000* 60);
-                long sec=(diff-days*(1000 * 60 * 60 * 24)-hours*(1000* 60 * 60)-min*(1000* 60))/(1000);
-                minute= (int) min;
-                second= (int) sec;
+                long hours = (diff - days * (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
+                long min = (diff - days * (1000 * 60 * 60 * 24) - hours * (1000 * 60 * 60)) / (1000 * 60);
+                long sec = (diff - days * (1000 * 60 * 60 * 24) - hours * (1000 * 60 * 60) - min * (1000 * 60)) /
+                        (1000);
+                minute = (int) min;
+                second = (int) sec;
                 startTime();
             }
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        userInfo= UserModel.getUserInfoMore(getApplicationContext());
+        userInfo = UserModel.getUserInfoMore(getApplicationContext());
         initView();
         for (int i = 0; i < ContextUtils.mPapers.size(); i++) {
             viewItems.add(getLayoutInflater().inflate(
                     R.layout.vote_submit_viewpager_item, null));
         }
-        pagerAdapter = new ExaminationSubmitAdapter(ExamActivity.this,viewItems,mExam);
+        pagerAdapter = new ExaminationSubmitAdapter(ExamActivity.this, viewItems, mExam);
         viewPager.setAdapter(pagerAdapter);
         viewPager.getParent().requestDisallowInterceptTouchEvent(false);
         new QJJUdpUtils().start();
     }
 
     public void initView() {
-        leftIv = (ImageView) findViewById(R.id.left);
-        titleTv = (TextView) findViewById(R.id.title);
+        ImageView leftIv = (ImageView) findViewById(R.id.left);
+        TextView titleTv = (TextView) findViewById(R.id.title);
         right = (TextView) findViewById(R.id.right);
         titleTv.setText("考试答题");
         viewPager = (ExamViewPager) findViewById(R.id.vote_submit_viewpager);
@@ -189,7 +221,7 @@ public class ExamActivity extends Activity {
         initViewPagerScroll();
     }
 
-    private void initViewPagerScroll( ){
+    private void initViewPagerScroll() {
         try {
             Field mScroller;
             mScroller = ViewPager.class.getDeclaredField("mScroller");
@@ -215,23 +247,23 @@ public class ExamActivity extends Activity {
     // 提交试卷
     public void uploadExamination() {
         int cent = 0;
-        flag=false;
-        List<UserAnswer> list=new ArrayList<>();
-        DbManager db=new DbManager(getApplicationContext());
+        flag = false;
+        List<UserAnswer> list = new ArrayList<>();
+        DbManager db = new DbManager(getApplicationContext());
         db.openDB();
 
-        for (int i=0;i<ContextUtils.mPapers.size();i++){
-            Paper paper=ContextUtils.mPapers.get(i);
+        for (int i = 0; i < ContextUtils.mPapers.size(); i++) {
+            Paper paper = ContextUtils.mPapers.get(i);
             //写本地数据库
             db.insertLibrary(paper);
             //生成答案列表
-            UserAnswer userAnswer=new UserAnswer();
-            userAnswer.answer=paper.getUserAnswer();
-            userAnswer.isright=paper.getAnswer().equals(paper.getUserAnswer())?1:0;
-            userAnswer.score=paper.getScroe();
-            userAnswer.seq=paper.getSeq();
-            userAnswer.testid=ContextUtils.testId;
-            userAnswer.timuid=paper.getId();
+            UserAnswer userAnswer = new UserAnswer();
+            userAnswer.answer = paper.getUserAnswer();
+            userAnswer.isright = paper.getAnswer().equals(paper.getUserAnswer()) ? 1 : 0;
+            userAnswer.score = paper.getScroe();
+            userAnswer.seq = paper.getSeq();
+            userAnswer.testid = ContextUtils.testId;
+            userAnswer.timuid = paper.getId();
             if (userAnswer.isright > 0) {
                 cent += userAnswer.score;
             }
@@ -244,9 +276,9 @@ public class ExamActivity extends Activity {
         exam.setJigeScore(mExam.getJiGeScore());
         db.insertTest(exam);
         result = cent + "(" + mExam.getJiGeScore() + ")";
-        ContextUtils.mUserAnswers=list;
+        ContextUtils.mUserAnswers = list;
         db.closeDB();
-        if(ContextUtils.mUserAnswers!=null&&ContextUtils.mUserAnswers.size()>0){
+        if (ContextUtils.mUserAnswers != null && ContextUtils.mUserAnswers.size() > 0) {
             new UploadDataThread().start();
             new JJUdpUtils().start();
         }
@@ -257,7 +289,7 @@ public class ExamActivity extends Activity {
         final Dialog builder = new Dialog(this, R.style.dialog);
         builder.setContentView(R.layout.my_dialog);
         TextView content = (TextView) builder.findViewById(R.id.dialog_content);
-        content.setText("您要结束本次考试吗？");
+        content.setText("是否确认交卷？");
         final Button confirm_btn = (Button) builder.findViewById(R.id.dialog_sure);
         Button cancel_btn = (Button) builder.findViewById(R.id.dialog_cancle);
         confirm_btn.setText("退出");
@@ -298,7 +330,7 @@ public class ExamActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        flag=false;
+        flag = false;
     }
 
     @Override
@@ -317,9 +349,9 @@ public class ExamActivity extends Activity {
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
-        outTime=new Date();
+        outTime = new Date();
     }
 
     private void startTime() {
@@ -337,51 +369,19 @@ public class ExamActivity extends Activity {
                 }
             };
         }
-        if (timer != null && timerTask != null) {
+        if (timer != null) {
             timer.schedule(timerTask, 0, 1000);
         }
     }
 
-    private Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case 1:
-                    Toast.makeText(getApplicationContext(),"交卷成功",Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(getApplicationContext(), ExamResultActivity.class);
-                    intent.putExtra("result", result);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivity(intent);
-                    break;
-                case 1011:
-                    second+=1;
-                    int hour=second/(60*60);
-                    int min=(second-hour*60*60)/60;
-                    int sec=(second-hour*60*60-min*60);
-                    right.setText(hour+"时"+min+"分"+sec+"秒");
-                    break;
-                case 1012:
-                    Bundle bundle=msg.getData();
-                    String result=bundle.getString("data");
-                    //这边是否需要解析
-                    Toast.makeText(getApplicationContext(),"您已被监考官强制交卷",Toast.LENGTH_LONG).show();
-                    type = 3;
-                    uploadExamination();
-                    break;
-            }
-        }
-    };
-
-    class UploadDataThread extends Thread{
+    private class UploadDataThread extends Thread {
         @Override
         public void run() {
             try {
-                if(ContextUtils.isLogin){
+                if (ContextUtils.isLogin) {
                     ExamModel.UploadPaper(getApplicationContext(), type);
                 }
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -389,7 +389,7 @@ public class ExamActivity extends Activity {
         }
     }
 
-    class JJUdpUtils extends Thread {
+    private class JJUdpUtils extends Thread {
         @Override
         public void run() {
             try {
@@ -398,24 +398,20 @@ public class ExamActivity extends Activity {
                 object.put("type", 3);
                 object.put("code", 2);
                 object.put("usertype", 3);
-                object.put("testcode",mExam.getId());
+                object.put("testcode", mExam.getId());
                 object.put("userid", userInfo.get("userid"));
                 object.put("name", userInfo.get("name"));
                 byte[] data = object.toString().getBytes();
                 DatagramPacket packet = new DatagramPacket(data, data.length, address, ConstantUtils.UDP_PORT);
                 DatagramSocket socket = new DatagramSocket();
                 socket.send(packet);
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    class QJJUdpUtils extends Thread {
+    private class QJJUdpUtils extends Thread {
         @Override
         public void run() {
             try {
@@ -424,7 +420,7 @@ public class ExamActivity extends Activity {
                 object.put("type", 5);
                 object.put("code", 2);
                 object.put("usertype", 2);
-                object.put("testcode",mExam.getId());
+                object.put("testcode", mExam.getId());
                 object.put("userid", userInfo.get("userid"));
                 object.put("name", userInfo.get("name"));
                 byte[] data = object.toString().getBytes();
@@ -444,17 +440,13 @@ public class ExamActivity extends Activity {
                     message.setData(bundle);
                     handler.sendMessage(message);
                 }
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    class MyThread implements Runnable {      // thread
+    private class MyThread implements Runnable {      // thread
         @Override
         public void run() {
             while (flag) {
@@ -463,7 +455,7 @@ public class ExamActivity extends Activity {
                     Message message = new Message();
                     message.what = 1011;
                     handler.sendMessage(message);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }

@@ -30,6 +30,22 @@ public class NoticeActivity extends AppCompatActivity {
     private int testCode;
     private int type;//0:考试通知，else：培训通知
     private int noticeId;
+    private TextView exam_time_notice_text_view;
+    private TextView exam_name_notice_text_view;
+    private TextView exam_address_notice_text_view;
+    private TextView exam_person_notice_text_view;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1:
+                    finish();
+                    break;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,12 +56,20 @@ public class NoticeActivity extends AppCompatActivity {
         }
         button_layout= (ViewGroup) findViewById(R.id.show_notice_detail);
         status_text_view= (TextView) findViewById(R.id.status_notice_detail);
+        exam_time_notice_text_view = (TextView) findViewById(R.id.exam_time_notice_text_view);
+        exam_name_notice_text_view = (TextView) findViewById(R.id.exam_name_notice_text_view);
+        exam_address_notice_text_view = (TextView) findViewById(R.id.exam_address_notice_text_view);
+        exam_person_notice_text_view = (TextView) findViewById(R.id.exam_person_notice_text_view);
 
         Bundle bundle=getIntent().getExtras();
         HistoryListItemObject object= (HistoryListItemObject) bundle.get(ConstantUtils.NOTICE);
         if(object!=null){
             String status=object.getStatus();
             status_text_view.setText(status);
+            exam_time_notice_text_view.setText(object.getDt());
+            exam_name_notice_text_view.setText(object.getTitle());
+            exam_person_notice_text_view.setText(object.getGroupid());
+            exam_address_notice_text_view.setText("");
             noticeId=object.getId();
             if(status.equals("未确认")){
                 if(object.getType().equals("考试通知")){
@@ -84,6 +108,7 @@ public class NoticeActivity extends AppCompatActivity {
         db.updateNoticeStatus(noticeId,status);
         db.closeDB();
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -93,18 +118,7 @@ public class NoticeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case 1:
-                        finish();
-                    break;
-            }
-        }
-    };
-    class ConfirmThread extends Thread{
+    private class ConfirmThread extends Thread {
         @Override
         public void run() {
             try {
@@ -114,17 +128,14 @@ public class NoticeActivity extends AppCompatActivity {
                     HomeModel.DengJiEdu(getApplicationContext(),testCode);
                 }
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | JSONException | IOException e) {
                 e.printStackTrace();
             }
             handler.sendEmptyMessage(1);
         }
     }
-    class RefuseThread extends Thread{
+
+    private class RefuseThread extends Thread {
         @Override
         public void run() {
             try {
@@ -134,11 +145,7 @@ public class NoticeActivity extends AppCompatActivity {
                     HomeModel.JuJuePx(getApplicationContext(), testCode);
                 }
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | JSONException | IOException e) {
                 e.printStackTrace();
             }
             handler.sendEmptyMessage(1);

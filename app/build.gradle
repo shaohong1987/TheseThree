@@ -7,8 +7,8 @@ android {
         applicationId "com.shaohong.thesethree"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 13
-        versionName "v2.4"
+        versionCode 14
+        versionName "v2.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters 'armeabi', 'armeabi-v7a', 'armeabi-v8a'

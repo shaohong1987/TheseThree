@@ -1,6 +1,10 @@
 [
     {
-        "merged": "C:\\Users\\ShaoHong\\AndroidStudioProjects\\TheseThree\\simplezxing\\build\\intermediates\\res\\merged\\androidTest\\debug\\raw\\beep.ogg",
-        "source": "C:\\Users\\ShaoHong\\AndroidStudioProjects\\TheseThree\\simplezxing\\build\\intermediates\\bundles\\debug\\res\\raw\\beep.ogg"
+        "merged": "/Users/shaohong/AndroidStudioProjects/TheseThree/simplezxing/build/intermediates/res/merged/androidTest/debug/raw/beep.ogg",
+        "source": "/Users/shaohong/AndroidStudioProjects/TheseThree/simplezxing/build/intermediates/bundles/debug/res/raw/beep.ogg"
+    },
+    {
+        "merged": "/Users/shaohong/AndroidStudioProjects/TheseThree/C:\\Users\\ShaoHong\\AndroidStudioProjects\\TheseThree\\simplezxing\\build\\intermediates\\res\\merged\\androidTest\\debug\\raw\\beep.ogg",
+        "source": "/Users/shaohong/AndroidStudioProjects/TheseThree/C:\\Users\\ShaoHong\\AndroidStudioProjects\\TheseThree\\simplezxing\\build\\intermediates\\bundles\\debug\\res\\raw\\beep.ogg"
     }
 ]

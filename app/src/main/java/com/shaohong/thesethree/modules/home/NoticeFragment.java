@@ -29,82 +29,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NoticeFragment extends Fragment implements AdapterView.OnItemClickListener {
+    private static int rowId = 0;
     private CustomSwipeListView mListView;
     private List<HistoryListItemObject> mMessageItems = new ArrayList<>();
-    private static int rowId=0;
     private HistoryListViewAdapter mAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
-    public NoticeFragment() {
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        swipeRefreshLayout.setRefreshing(true);
-        DbManager dbManager=new DbManager(getContext());
-        dbManager.openDB();
-        mMessageItems.clear();
-        List<HistoryListItemObject> data=dbManager.queryNotices();
-        if(data!=null&&data.size()>0){
-            mMessageItems.addAll(data);
-        }
-        rowId=dbManager.getMaxNoticeId();
-        dbManager.closeDB();
-        new LoadDataThread().start();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.fragment_home_notice, container, false);
-        swipeRefreshLayout= (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout_notice);
-        swipeRefreshLayout.setColorSchemeResources(R.color.colorBlue);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                new LoadDataThread().start();
-            }
-        });
-        mAdapter=new HistoryListViewAdapter(getContext(),mMessageItems);
-        mListView = (CustomSwipeListView) view.findViewById(R.id.list);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(this);
-        swipeRefreshLayout.setRefreshing(true);
-        DbManager dbManager=new DbManager(getContext());
-        dbManager.openDB();
-        List<HistoryListItemObject> data=dbManager.queryNotices();
-        if(data!=null&&data.size()>0){
-            mMessageItems.addAll(data);
-        }
-        rowId=dbManager.getMaxNoticeId();
-        dbManager.closeDB();
-        new LoadDataThread().start();
-        return view;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        HistoryListItemObject object=mMessageItems.get(position);
-        Intent intent=new Intent(getActivity(),NoticeActivity.class);
-        intent.putExtra(ConstantUtils.NOTICE,object);
-        startActivityForResult(intent,1);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==1){
-            new LoadDataThread().start();
-        }
-    }
-
-    private Handler handler = new Handler(){
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.what) {
                 case 1:
-                    if (swipeRefreshLayout.isRefreshing()){
+                    if (swipeRefreshLayout.isRefreshing()) {
                         mAdapter.notifyDataSetChanged();
                         swipeRefreshLayout.setRefreshing(false);//设置不刷新
                     }
@@ -112,29 +48,103 @@ public class NoticeFragment extends Fragment implements AdapterView.OnItemClickL
             }
         }
     };
-    class LoadDataThread extends Thread{
+
+    public NoticeFragment() {
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        swipeRefreshLayout.setRefreshing(true);
+        DbManager dbManager = new DbManager(getContext());
+        dbManager.openDB();
+        mMessageItems.clear();
+        List<HistoryListItemObject> data = dbManager.queryNotices();
+        if (data != null && data.size() > 0) {
+            mMessageItems.addAll(data);
+        }
+        rowId = dbManager.getMaxNoticeId();
+        dbManager.closeDB();
+        new LoadDataThread().start();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_home_notice, container, false);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout_notice);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorBlue);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new LoadDataThread().start();
+            }
+        });
+        mAdapter = new HistoryListViewAdapter(getContext(), mMessageItems);
+        mListView = (CustomSwipeListView) view.findViewById(R.id.list);
+        mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(this);
+        swipeRefreshLayout.setRefreshing(true);
+        DbManager dbManager = new DbManager(getContext());
+        dbManager.openDB();
+        List<HistoryListItemObject> data = dbManager.queryNotices();
+        if (data != null && data.size() > 0) {
+            mMessageItems.addAll(data);
+        }
+        rowId = dbManager.getMaxNoticeId();
+        dbManager.closeDB();
+        new LoadDataThread().start();
+        return view;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        HistoryListItemObject object = mMessageItems.get(position);
+        Intent intent = new Intent(getActivity(), NoticeActivity.class);
+        intent.putExtra(ConstantUtils.NOTICE, object);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            new LoadDataThread().start();
+        }
+    }
+
+    class LoadDataThread extends Thread {
         @Override
         public void run() {
             try {
                 if (ContextUtils.isLogin) {
                     List<HistoryListItemObject> data = HomeModel.getNotice(getContext(), rowId);
-                    if(data!=null&&data.size()>0){
-                        DbManager dbManager=new DbManager(getContext());
+                    if (data != null && data.size() > 0) {
+                        DbManager dbManager = new DbManager(getContext());
                         dbManager.openDB();
-                        for (int i=0;i<data.size();i++){
-                            dbManager.insertNotice(data.get(i));
+                        for (int i = 0; i < data.size(); i++) {
+                            if (mMessageItems.size() > 0) {
+                                boolean flag = true;
+                                for (int j = 0; j < mMessageItems.size(); j++) {
+                                    if (mMessageItems.get(j).getId() == data.get(i).getId()) {
+                                        flag = false;
+                                        break;
+                                    }
+                                }
+                                if (flag) {
+                                    dbManager.insertNotice(data.get(i));
+                                    mMessageItems.add(data.get(i));
+                                }
+                            } else {
+
+                            }
                         }
-                        rowId=dbManager.getMaxNoticeId();
+                        rowId = dbManager.getMaxNoticeId();
                         dbManager.closeDB();
-                        mMessageItems.addAll(data);
                     }
                 }
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+                Thread.sleep(100);
+            } catch (InterruptedException | JSONException | IOException e) {
                 e.printStackTrace();
             }
             handler.sendEmptyMessage(1);
