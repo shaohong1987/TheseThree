@@ -83,7 +83,7 @@ public class ExamEnterFragment extends Fragment {
                         }
 
                     }else{
-                        //去判断考试状态，应该调用接口
+                        //去判断考试状态，应该调用接口！！
                     }
                 }
                 if (arg.equals("开始答题") && t.equals("考试开始")) {
