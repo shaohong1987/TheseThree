@@ -192,22 +192,22 @@ public class ExamEnterFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        if (resultCode == RESULT_OK) {
-//            Bundle bundle = data.getExtras();
-//            String scanResult = (String) bundle.get("SCAN_RESULT");
-//            if (String.valueOf(mExam.getId()).equals(scanResult)) {
-//                new LoadDataThread().start();
-//                new QdUdpUtils().start();
-//            } else {
-//                new AlertDialog.Builder(getContext())
-//                        .setTitle("提示")
-//                        .setMessage("签到失败，请确认是否进错考场!")
-//                        .setPositiveButton("确定", null)
-//                        .show();
-//            }
-//        }
-        new LoadDataThread().start();
-        new QdUdpUtils().start();
+        if (resultCode == RESULT_OK) {
+            Bundle bundle = data.getExtras();
+            String scanResult = (String) bundle.get("SCAN_RESULT");
+            if (String.valueOf(mExam.getId()).equals(scanResult)) {
+                new LoadDataThread().start();
+                new QdUdpUtils().start();
+            } else {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("提示")
+                        .setMessage("签到失败，请确认是否进错考场!")
+                        .setPositiveButton("确定", null)
+                        .show();
+            }
+        }
+//        new LoadDataThread().start();
+//        new QdUdpUtils().start();
     }
 
     private void initTimer() throws ParseException {
